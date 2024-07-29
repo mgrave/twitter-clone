@@ -1,6 +1,17 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
+const postSchema = new mongoose.Schema({
+  tweet: { type: mongoose.Schema.Types.ObjectId, ref: "Tweet", required: true },
+  type: {
+    type: String,
+    enum: ["tweet", "retweet", "comment"],
+    default: "tweet",
+  },
+  createdAt: { type: Date, default: Date.now },
+  username: { type: String, required: true },
+});
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -39,11 +50,15 @@ const userSchema = new mongoose.Schema(
     },
     profileImage: {
       type: String,
-      default: "default_profile_image_url",
+      default: null,
     },
     bannerImage: {
       type: String,
-      default: "default_banner_image_url",
+      default: null,
+    },
+    posts: {
+      type: [postSchema],
+      default: [],
     },
   },
   { timestamps: true }
