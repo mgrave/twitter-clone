@@ -1,5 +1,21 @@
 import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const deleteImage = (imagePath) => {
+  const fullPath = path.resolve(imagePath);
+  console.log(fullPath);
+  fs.unlink(fullPath, (err) => {
+    if (err) {
+      console.error(`Error deleting image: ${err}`);
+    }
+  });
+};
 
 const registerUser = async (req, res) => {
   try {
@@ -8,15 +24,13 @@ const registerUser = async (req, res) => {
     if (!name || !username || !email || !password) {
       return res.status(400).json({
         message: "All fields are required.",
-        success: false,
       });
     }
 
     const userExists = await User.findOne({ email });
     if (userExists) {
-      res.status(400).json({
+      return res.status(400).json({
         message: "User already exists.",
-        success: false,
       });
     }
 
@@ -36,18 +50,17 @@ const registerUser = async (req, res) => {
         username: savedUser.username,
         email: savedUser.email,
         token: generateToken(savedUser._id),
+        message: "User registered successfully",
       });
     } else {
       res.status(400).json({
-        message: "Invalid user data.",
-        success: false,
+        message: "Failed to save user.",
       });
     }
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: "Server error. Please try again later.",
-      success: false,
+      message: "Failed to register user: " + err.message,
     });
   }
 };
@@ -59,7 +72,6 @@ const loginUser = async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({
         message: "All fields are required.",
-        success: false,
       });
     }
 
@@ -67,7 +79,6 @@ const loginUser = async (req, res) => {
     if (!user) {
       return res.status(401).json({
         message: "Invalid email or password.",
-        success: false,
       });
     }
 
@@ -75,7 +86,6 @@ const loginUser = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({
         message: "Invalid email or password",
-        success: false,
       });
     }
 
@@ -87,13 +97,12 @@ const loginUser = async (req, res) => {
       username: user.username,
       email: user.email,
       token,
-      success: true,
+      message: "User logged in successfully",
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: "Server error. Please try again later.",
-      success: false,
+      message: "Failed to login user: " + err.message,
     });
   }
 };
@@ -107,19 +116,150 @@ const logoutUser = async (req, res) => {
 
   res.status(200).json({
     message: "User logged out successfully.",
-    success: true,
   });
 };
 
-const toggleFollowUser = async (req, res) => {
+const getLoggedInUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      user,
+      message: "Logged in user retrieved successfully",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "Failed to retrieve logged in user: " + err.message,
+    });
+  }
+};
+
+const getUsers = async (req, res) => {
+  try {
+    const users = await User.find({
+      _id: { $ne: req.user._id },
+    }).select("name username profileImage");
+
+    res.status(200).json({
+      users,
+      message: "Users retrieved successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch users: " + error.message,
+    });
+  }
+};
+
+const getUserByUsername = async (req, res) => {
+  try {
+    const user = await User.findOne({ username: req.params.username }).select(
+      "-password"
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      user,
+      message: "User profile retrieved successfully",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "Failed to retrieve user profile: " + err.message,
+    });
+  }
+};
+
+const updateUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    if (req.files && req.files.profileImage) {
+      if (user.profileImage) {
+        deleteImage(
+          path.join(
+            __dirname,
+            "..",
+            "profileUploads",
+            user.username,
+            user.profileImage
+          )
+        );
+      }
+      user.profileImage = req.files.profileImage[0].filename;
+    }
+
+    if (req.files && req.files.bannerImage) {
+      if (user.bannerImage) {
+        deleteImage(
+          path.join(
+            __dirname,
+            "..",
+            "profileUploads",
+            user.username,
+            user.bannerImage
+          )
+        );
+      }
+      user.bannerImage = req.files.bannerImage[0].filename;
+    }
+
+    user.name = req.body.name || user.name;
+    user.username = req.body.username || user.username;
+
+    if (req.body.password) {
+      user.password = req.body.password;
+    }
+
+    const updatedUser = await user.save();
+
+    res.status(200).json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      username: updatedUser.username,
+      email: updatedUser.email,
+      profileImage: updatedUser.profileImage,
+      bannerImage: updatedUser.bannerImage,
+      following: updatedUser.following,
+      followers: updatedUser.followers,
+      posts: updatedUser.posts,
+      createdAt: updatedUser.createdAt,
+      message: "Profile updated successfully",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "Failed to update profile: " + err.message,
+    });
+  }
+};
+
+const toggleFollow = async (req, res) => {
   try {
     const userToToggle = await User.findById(req.params.userId);
     const currentUser = await User.findById(req.user._id);
 
     if (!userToToggle) {
-      res.status(404).json({
+      return res.status(404).json({
         message: "User not found",
-        success: false,
       });
     }
 
@@ -132,11 +272,11 @@ const toggleFollowUser = async (req, res) => {
       userToToggle.followers = userToToggle.followers.filter(
         (id) => id.toString() !== currentUser._id.toString()
       );
-      res.json({ message: "User unfollowed successfully" });
+      res.status(200).json({ message: "User unfollowed successfully" });
     } else {
       currentUser.following.push(userToToggle._id);
       userToToggle.followers.push(currentUser._id);
-      res.json({ message: "User followed successfully" });
+      res.status(200).json({ message: "User followed successfully" });
     }
 
     await currentUser.save();
@@ -144,94 +284,8 @@ const toggleFollowUser = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: "Server error. Please try again later.",
-      success: false,
+      message: "Failed to toggle follow status: " + err.message,
     });
-  }
-};
-
-const getUserProfile = async (req, res) => {
-  try {
-    const user = await User.findById(req.params.userId).select("-password");
-
-    if (!user) {
-      res.status(404).json({
-        message: "User not found",
-        success: false,
-      });
-    }
-
-    res.json({
-      success: true,
-      user,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      message: "Server error",
-      success: false,
-    });
-  }
-};
-
-const updateUserProfile = async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id);
-
-    if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-        success: false,
-      });
-    }
-
-    user.name = req.body.name || user.name;
-    user.username = req.body.username || user.username;
-    user.email = req.body.email || user.email;
-    user.profileImage = req.body.profileImage || user.profileImage;
-    user.bannerImage = req.body.bannerImage || user.bannerImage;
-
-    if (req.body.password) {
-      user.password = req.body.password;
-    }
-
-    const updatedUser = await user.save();
-
-    res.json({
-      _id: updatedUser._id,
-      name: updatedUser.name,
-      username: updatedUser.username,
-      email: updatedUser.email,
-      profileImage: updatedUser.profileImage,
-      bannerImage: updatedUser.bannerImage,
-      followers: updatedUser.followers,
-      following: updatedUser.following,
-      bookmarks: updatedUser.bookmarks,
-      likedTweets: updatedUser.likedTweets,
-      message: "Profile updated successfully",
-      success: true,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      message: "Server error",
-      success: false,
-    });
-  }
-};
-
-const getUsers = async (req, res) => {
-  try {
-    const users = await User.find({
-      _id: { $ne: req.user._id },
-      followers: { $nin: [req.user._id] },
-    }).select("name username profileImage");
-
-    res.json(users);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching users", error: error.message });
   }
 };
 
@@ -239,8 +293,9 @@ export {
   registerUser,
   loginUser,
   logoutUser,
-  toggleFollowUser,
-  getUserProfile,
-  updateUserProfile,
+  getLoggedInUser,
   getUsers,
+  getUserByUsername,
+  updateUser,
+  toggleFollow,
 };
