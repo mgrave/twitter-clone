@@ -88,10 +88,10 @@ const CommentModal = ({ isOpen, onClose, tweet, onCommentCreated }) => {
   const formattedDate = timeSince(tweet.createdAt);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white rounded-2xl w-[600px] absolute top-4 p-4 pt-16 max-h-[600px] overflow-auto">
+    <div className="fixed bg-black bg-opacity-50 flex justify-center items-center z-[999999999999] dark:bg-white dark:bg-opacity-10 w-[100vw] h-full">
+      <div className="bg-white rounded-2xl w-[80%] max-w-[600px] absolute top-4 p-4 pt-16 max-h-[600px] overflow-auto dark:bg-black dark:text-white">
         <button
-          className="absolute top-3 left-3 hover:bg-gray-700 hover:bg-opacity-15 rounded-full h-[36px] w-[36px] flex items-center justify-center transition-colors duration-300"
+          className="absolute top-3 left-3 hover:bg-gray-700 hover:bg-opacity-15 rounded-full h-[36px] w-[36px] flex items-center justify-center transition-colors duration-300   dark:hover:bg-gray-300 dark:hover:bg-opacity-15"
           onClick={() => {
             onClose();
             setCommentContent("");
@@ -129,7 +129,7 @@ const CommentModal = ({ isOpen, onClose, tweet, onCommentCreated }) => {
             </div>
           </div>
         </div>
-        <div className="py-3 border-b border-gray-200 pb-6 relative">
+        <div className="py-3 border-b border-gray-200 pb-6 relative dark:border-gray-600">
           <div className="flex items-start ">
             <ProfileAvatar
               name={user.name}
@@ -142,7 +142,7 @@ const CommentModal = ({ isOpen, onClose, tweet, onCommentCreated }) => {
             >
               <textarea
                 ref={textareaRef}
-                className="w-full resize-none outline-none border-none text-xl form pr-2 max-h-full"
+                className="w-full resize-none outline-none border-none text-xl form pr-2 max-h-full dark:bg-black dark:text-white"
                 placeholder="Postea tu respuesta"
                 rows="1"
                 maxLength={280}
@@ -160,7 +160,7 @@ const CommentModal = ({ isOpen, onClose, tweet, onCommentCreated }) => {
                 <img
                   src={imagePreview}
                   alt="Preview"
-                  className="w-full h-auto rounded-2xl"
+                  className="rounded-2xl max-h-[300px]"
                 />
                 <button
                   className="absolute top-1 right-1 w-[32px] h-[32px]"
@@ -184,7 +184,7 @@ const CommentModal = ({ isOpen, onClose, tweet, onCommentCreated }) => {
               <>
                 <label
                   htmlFor="image-uploades"
-                  className="p-2 rounded-full hover:bg-sky-100 cursor-pointer transition-colors duration-300"
+                  className="p-2.5 hover:bg-sky-400 hover:bg-opacity-15 rounded-full cursor-pointer hover:text-sky-500 transition-colors duration-300"
                 >
                   <GrImage className="text-sky-500 cursor-pointer" />
                 </label>

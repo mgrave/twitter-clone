@@ -7,6 +7,8 @@ import Loader from "../components/Loader.jsx";
 import PostModal from "../components/PostModal.jsx";
 import CommentModal from "../components/CommentModal.jsx";
 import { useAuth } from "../utils/AuthContext.jsx";
+import MobileNavbar from "../components/MobileNavbar.jsx";
+import { PostButton } from "../components/PostButton.jsx";
 
 export const Home = () => {
   const { user, loading, fetchUser } = useAuth();
@@ -18,7 +20,7 @@ export const Home = () => {
 
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, [fetchUser]);
 
   const handleTweetClick = (tweet) => {
     navigate(`/post/${tweet._id}`);
@@ -44,13 +46,16 @@ export const Home = () => {
   }
 
   return (
-    <div className="relative w-full flex">
+    <div
+      className={`relative w-full flex bg-white dark:bg-black justify-center`}
+    >
       <LeftSidebar onPostButtonClick={() => setShowPostModal(true)} />
-      <div className="w-[990px] flex mr-[40px] gap-[35px]">
+      <div className="w-full md:w-auto lg:w-[990px] flex gap-[35px] bg-white dark:bg-black">
         <Feed
           onClick={handleTweetClick}
           onCommentClick={handleCommentClick}
           fetch={fetching}
+          onCreated={handleTweetCreated}
         />
         <RightSidebar />
       </div>
@@ -65,6 +70,8 @@ export const Home = () => {
         tweet={selectedTweet}
         onCommentCreated={handleCommentCreated}
       />
+      <MobileNavbar onPostButtonClick={() => setShowPostModal(true)} />
+      <PostButton onPostButtonClick={() => setShowPostModal(true)} />
     </div>
   );
 };

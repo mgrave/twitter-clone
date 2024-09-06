@@ -38,8 +38,6 @@ const Tweet = ({
     _id,
   } = tweet;
 
-  const formattedDate = timeSince(createdAt);
-
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isRetweeted, setIsRetweeted] = useState(false);
@@ -59,6 +57,13 @@ const Tweet = ({
   const [uploadImage, setUploadImage] = useState(null);
   const [removeImage, setRemoveImage] = useState(false);
   const optionsRef = useRef(null);
+
+  const [formattedDate, setFormattedDate] = useState("");
+
+  useEffect(() => {
+    // Calculamos la fecha solo una vez
+    setFormattedDate(timeSince(createdAt));
+  }, [createdAt]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -114,7 +119,7 @@ const Tweet = ({
 
     fetchTweetData();
     checkFollowingStatus();
-  }, [_id, currentUser._id, user._id]);
+  }, [_id, currentUser._id, user._id, user.username]);
 
   const handleLike = async (event) => {
     event.preventDefault();
@@ -297,14 +302,17 @@ const Tweet = ({
 
   return (
     <div
-      className="border-b border-gray-200 cursor-pointer hover:bg-gray-100 hover:bg-opacity-70 transition-colors duration-300"
+      className="border-b border-gray-200 dark:border-gray-600 cursor-pointer hover:bg-gray-100 hover:bg-opacity-70 transition-colors duration-300 dark:hover:bg-gray-300 dark:hover:bg-opacity-5"
       onClick={handleClick}
     >
       <div className={`${type !== "retweet" ? "pt-4" : "pt-1"}`}>
         {type === "retweet" && (
           <div className="ml-10 flex items-center">
-            <HiArrowPathRoundedSquare size={16} className="text-gray-600" />
-            <span className="ml-2 text-gray-600 font-semibold text-sm">
+            <HiArrowPathRoundedSquare
+              size={16}
+              className="text-gray-600 dark:text-white"
+            />
+            <span className="ml-2 text-gray-600 font-semibold text-sm dark:text-white">
               {rtUser === username ? "reposteaste" : `@${rtUser} reposteó`}
             </span>
           </div>
@@ -317,11 +325,11 @@ const Tweet = ({
               profileImage={user.profileImage}
               profileClick={handleProfileClick}
             />
-            <div className="ml-2 w-full">
+            <div className="ml-2 w-[calc(100%-48px)]">
               <div className="flex items-center justify-between">
                 <span className="flex">
                   <h1
-                    className="font-bold hover:underline"
+                    className="font-bold hover:underline text-black dark:text-white"
                     onClick={handleProfileClick}
                   >
                     {user.name}
@@ -337,18 +345,18 @@ const Tweet = ({
                   {!isEditing ? (
                     <>
                       <div
-                        className="p-2.5 hover:bg-sky-200 rounded-full cursor-pointer hover:bg-opacity-60 hover:text-sky-500 transition-colors duration-300"
+                        className="p-2.5 hover:bg-sky-400 hover:bg-opacity-15 rounded-full cursor-pointer hover:text-sky-500 transition-colors duration-300"
                         onClick={handleOptionsClick}
                       >
                         <SlOptions size={"16"} className="text-inherit" />
                       </div>
                       {showOptions && (
-                        <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded-lg shadow-lg z-50 overflow-hidden">
+                        <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded-lg shadow-lg z-50 overflow-hidden dark:bg-black dark:border-gray-600">
                           {user._id === currentUser._id ? (
                             <>
                               {!isEditing ? (
                                 <button
-                                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-900 hover:bg-opacity-5 transition-colors duration-300"
+                                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-700 hover:bg-opacity-5 transition-colors duration-300 dark:text-white dark:hover:bg-gray-300 dark:hover:bg-opacity-15"
                                   onClick={handleEdit}
                                 >
                                   Editar
@@ -357,7 +365,7 @@ const Tweet = ({
                                 <></>
                               )}
                               <button
-                                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-700 hover:bg-opacity-5 transition-colors duration-300"
+                                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-700 hover:bg-opacity-5 transition-colors duration-300 dark:text-white dark:hover:bg-gray-300 dark:hover:bg-opacity-15"
                                 onClick={handleDelete}
                               >
                                 Eliminar
@@ -365,7 +373,7 @@ const Tweet = ({
                             </>
                           ) : (
                             <button
-                              className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-700 hover:bg-opacity-5 transition-colors duration-300"
+                              className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-700 hover:bg-opacity-5 transition-colors duration-300 dark:text-white"
                               onClick={handleFollow}
                             >
                               {isFollowing ? "Dejar de seguir" : "Seguir"}
@@ -377,13 +385,13 @@ const Tweet = ({
                   ) : (
                     <div className="flex gap-1">
                       <button
-                        className="block w-full text-left px-2 py-1 text-black border border-gray-800 hover:bg-gray-900 hover:bg-opacity-5 transition-colors duration-300 rounded-lg"
+                        className="block w-full text-left px-2 py-1 text-black border border-gray-800 hover:bg-gray-900 hover:bg-opacity-5 transition-colors duration-300 rounded-lg dark:text-white dark:border-gray-600 dark:hover:bg-gray-800"
                         onClick={handleCancelEdit}
                       >
                         Cancelar
                       </button>
                       <button
-                        className="block w-full text-left px-2 py-1 text-white bg-black hover:bg-gray-800 rounded-lg transition-colors duration-300"
+                        className="block w-full text-left px-2 py-1 text-white bg-black hover:bg-gray-800 rounded-lg transition-colors duration-300 dark:bg-white dark:text-black dark:hover:bg-gray-200"
                         onClick={handleSaveEdit}
                       >
                         Guardar
@@ -393,7 +401,9 @@ const Tweet = ({
                 </div>
               </div>
               {!isEditing ? (
-                <p>{content}</p>
+                <p className="text-black dark:text-white break-words">
+                  {content}
+                </p>
               ) : (
                 <div>
                   <textarea
@@ -401,7 +411,7 @@ const Tweet = ({
                     onChange={(e) => setContent(e.target.value)}
                     onClick={(e) => e.stopPropagation()}
                     onMouseDown={(e) => e.stopPropagation()}
-                    className="mt-2 p-1 border border-gray-300 rounded-lg w-full resize-none"
+                    className="mt-2 p-1 border border-gray-300 rounded-lg w-full resize-none dark:text-white dark:bg-black dark:border-gray-600"
                   />
                   {imagePreview && (
                     <div className="relative">
@@ -447,9 +457,9 @@ const Tweet = ({
               {tweetImage && (
                 <div className="relative">
                   <img
-                    src={`http://localhost:8080/uploads/${tweetImage}`}
+                    src={`http://localhost:8080/api/tweets/image/${tweetImage}`}
                     alt="tweet"
-                    className="mt-2 rounded-lg"
+                    className="mt-2 rounded-lg max-h-[550px]"
                   />
                   {isEditing && (
                     <>
@@ -487,7 +497,7 @@ const Tweet = ({
               {isEditing && !imagePreview && !tweetImage && (
                 <label
                   htmlFor="edit-image-tweet"
-                  className="flex items-center justify-center h-[30px] w-[30px] rounded-full hover:bg-sky-200 cursor-pointer transition-colors duration-300"
+                  className="flex items-center justify-center h-[30px] w-[30px] rounded-full hover:bg-sky-400 hover:bg-opacity-15 cursor-pointer transition-colors duration-300"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <RiImageAddLine
@@ -508,7 +518,7 @@ const Tweet = ({
                   className={`flex items-center hover:text-sky-500 text-gray-400`}
                 >
                   <div
-                    className="p-2.5 hover:bg-sky-200 rounded-full cursor-pointer hover:bg-opacity-60 transition-colors duration-300"
+                    className="p-2.5 hover:bg-sky-200 rounded-full cursor-pointer hover:bg-opacity-60 transition-colors duration-300 dark:hover:bg-sky-400 dark:hover:bg-opacity-15"
                     onClick={handleCommentClick}
                   >
                     <FaRegComment size={"16"} className="text-inherit" />
@@ -524,7 +534,7 @@ const Tweet = ({
                   }`}
                 >
                   <div
-                    className={`p-2 hover:bg-green-200 rounded-full cursor-pointer hover:bg-opacity-60 transition-colors duration-300`}
+                    className={`p-2 hover:bg-green-200 rounded-full cursor-pointer hover:bg-opacity-60 transition-colors duration-300 dark:hover:bg-green-400 dark:hover:bg-opacity-15`}
                     onClick={handleRetweet}
                   >
                     <HiArrowPathRoundedSquare
@@ -543,7 +553,7 @@ const Tweet = ({
                   }`}
                 >
                   <div
-                    className="p-2.5 hover:bg-red-200 rounded-full cursor-pointer hover:bg-opacity-60 transition-colors duration-300"
+                    className="p-2.5 hover:bg-red-200 rounded-full cursor-pointer hover:bg-opacity-60 transition-colors duration-300 dark:hover:bg-red-400 dark:hover:bg-opacity-15"
                     onClick={handleLike}
                   >
                     {isLiked ? (
@@ -563,7 +573,7 @@ const Tweet = ({
                   }`}
                 >
                   <div
-                    className="p-2.5 hover:bg-sky-200 rounded-full cursor-pointer hover:bg-opacity-60 transition-colors duration-300"
+                    className="p-2.5 hover:bg-sky-200 rounded-full cursor-pointer hover:bg-opacity-60 transition-colors duration-300 dark:hover:bg-sky-400 dark:hover:bg-opacity-15"
                     onClick={handleBookmark}
                   >
                     {isBookmarked ? (

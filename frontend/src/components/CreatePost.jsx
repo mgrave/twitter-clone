@@ -8,7 +8,7 @@ import "../styles/index.css";
 import { ProfileAvatar } from "./ProfileAvatar.jsx";
 import { useNavigate } from "react-router-dom";
 
-export const CreatePost = () => {
+export const CreatePost = ({ onCreated }) => {
   const [tweetContent, setTweetContent] = useState("");
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -20,6 +20,7 @@ export const CreatePost = () => {
   useEffect(() => {
     const textarea = textareaRef.current;
     const container = containerRef.current;
+
     const handleInput = () => {
       textarea.style.height = "auto";
       textarea.style.height = textarea.scrollHeight + "px";
@@ -63,6 +64,8 @@ export const CreatePost = () => {
         formData.append("image", image);
       }
 
+      console.log([...formData]); // Añade esta línea para depurar el contenido de FormData
+
       await instance.post("/api/tweets", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -72,6 +75,7 @@ export const CreatePost = () => {
       setTweetContent("");
       setImage(null);
       setImagePreview(null);
+      onCreated();
     } catch (err) {
       console.error("Error al crear el tweet:", err);
     }
@@ -88,7 +92,7 @@ export const CreatePost = () => {
   };
 
   return (
-    <div className="px-4 py-3 border-y border-gray-200 pb-2">
+    <div className="xsm-cp px-4 py-3 border-y border-gray-200 dark:border-gray-600 pb-2">
       <div className="flex items-start">
         <ProfileAvatar
           name={user.name}
@@ -102,7 +106,7 @@ export const CreatePost = () => {
         >
           <textarea
             ref={textareaRef}
-            className="w-full resize-none outline-none border-none text-xl form pr-2 max-h-full"
+            className="w-full resize-none outline-none border-none text-xl form pr-2 max-h-full bg-white dark:bg-black text-black dark:text-white"
             placeholder="¿Qué está pasando?"
             rows="1"
             maxLength={280}
@@ -117,7 +121,7 @@ export const CreatePost = () => {
             <img
               src={imagePreview}
               alt="Preview"
-              className="w-full h-auto rounded-2xl"
+              className="rounded-2xl max-h-[500px]"
             />
             <button
               className="absolute top-1 right-1 w-[32px] h-[32px]"
@@ -133,10 +137,10 @@ export const CreatePost = () => {
         )}
         {!imagePreview && <div className="mb-6"></div>}
       </div>
-      <div className="ml-[2.55rem] flex justify-between items-center border-t border-gray-200 pt-2">
+      <div className="ml-[2.55rem] flex justify-between items-center border-t border-gray-200 dark:border-gray-600 pt-2">
         <label
           htmlFor="image-upload"
-          className="p-2 rounded-full hover:bg-sky-100 cursor-pointer transition-colors duration-300"
+          className="p-2 rounded-full hover:bg-sky-100 dark:hover:bg-sky-400 dark:hover:bg-opacity-15 cursor-pointer transition-colors duration-300"
         >
           <GrImage className="text-sky-500 cursor-pointer" />
         </label>

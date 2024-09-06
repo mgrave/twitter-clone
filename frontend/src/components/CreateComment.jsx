@@ -84,7 +84,7 @@ export const CreateComment = ({ tweetId, onCommentCreated }) => {
   };
 
   return (
-    <div className="px-4 py-3 border-b border-gray-200 pb-6 relative">
+    <div className="px-4 py-3 border-b border-gray-200 pb-6 relative dark:border-gray-600">
       <div className="flex items-start ">
         <ProfileAvatar
           name={user.name}
@@ -97,7 +97,7 @@ export const CreateComment = ({ tweetId, onCommentCreated }) => {
         >
           <textarea
             ref={textareaRef}
-            className="w-full resize-none outline-none border-none text-xl form pr-2 max-h-full"
+            className="w-full resize-none outline-none border-none text-xl form pr-2 max-h-full bg-white dark:bg-black dark:text-white"
             placeholder="Postea tu respuesta"
             rows="1"
             maxLength={280}
@@ -115,7 +115,7 @@ export const CreateComment = ({ tweetId, onCommentCreated }) => {
             <img
               src={imagePreview}
               alt="Preview"
-              className="w-full h-auto rounded-2xl"
+              className="h-auto rounded-2xl max-h-[400px]"
             />
             <button
               className="absolute top-1 right-1 w-[32px] h-[32px]"
@@ -139,7 +139,7 @@ export const CreateComment = ({ tweetId, onCommentCreated }) => {
           <>
             <label
               htmlFor="image-upload"
-              className="p-2 rounded-full hover:bg-sky-100 cursor-pointer transition-colors duration-300"
+              className="p-2.5 hover:bg-sky-400 hover:bg-opacity-15 rounded-full cursor-pointer hover:text-sky-500 transition-colors duration-300"
             >
               <GrImage className="text-sky-500 cursor-pointer" />
             </label>

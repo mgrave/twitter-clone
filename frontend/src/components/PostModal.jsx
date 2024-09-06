@@ -80,10 +80,10 @@ const PostModal = ({ isOpen, onClose, onTweetCreated }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white rounded-2xl w-[600px] absolute top-4 p-4 pt-20">
+    <div className="fixed bg-black bg-opacity-50 flex justify-center items-center z-[99999999999999] dark:bg-white dark:bg-opacity-10 w-[100vw] h-full">
+      <div className="bg-white rounded-2xl w-[80%] max-w-[600px] absolute top-4 p-4 pt-20 dark:bg-black dark:text-white">
         <button
-          className="absolute top-3 left-3 hover:bg-gray-700 hover:bg-opacity-15 rounded-full h-[36px] w-[36px] flex items-center justify-center transition-colors duration-300"
+          className="absolute top-3 left-3 hover:bg-gray-700 hover:bg-opacity-15 rounded-full h-[36px] w-[36px] flex items-center justify-center transition-colors duration-300 dark:hover:bg-gray-300 dark:hover:bg-opacity-15"
           onClick={() => {
             onClose();
             setTweetContent("");
@@ -105,7 +105,7 @@ const PostModal = ({ isOpen, onClose, onTweetCreated }) => {
           >
             <textarea
               ref={textareaRef}
-              className="w-full resize-none outline-none border-none text-2xl form pr-2 h-full"
+              className="w-full resize-none outline-none border-none text-2xl form pr-2 h-full dark:bg-black dark:text-white"
               placeholder="¿Qué está pasando?"
               rows="1"
               maxLength={280}
@@ -120,7 +120,7 @@ const PostModal = ({ isOpen, onClose, onTweetCreated }) => {
               <img
                 src={imagePreview}
                 alt="Preview"
-                className="w-full h-auto rounded-2xl"
+                className="h-auto rounded-2xl max-h-[300px]"
               />
               <button
                 className="absolute top-1 right-1 w-[32px] h-[32px]"
@@ -136,7 +136,7 @@ const PostModal = ({ isOpen, onClose, onTweetCreated }) => {
           )}
           {!imagePreview && <div className="mb-6"></div>}
         </div>
-        <div className=" flex justify-between items-center border-t border-gray-200 pt-2 mt-6">
+        <div className=" flex justify-between items-center border-t border-gray-200 pt-2 mt-6 dark:border-gray-600">
           <label
             htmlFor="image-uploade"
             className="p-2 rounded-full hover:bg-sky-200 hover:bg-opacity-60 cursor-pointer transition-colors duration-300"

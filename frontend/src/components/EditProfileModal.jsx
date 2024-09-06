@@ -14,14 +14,14 @@ export const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
   useEffect(() => {
     if (user.profileImage) {
       setProfileImagePreview(
-        `http://localhost:8080/profileUploads/${user.username}/${user.profileImage}`
+        `http://localhost:8080/api/user/profileImage/${user.profileImage}`
       );
     } else {
       setProfileImagePreview(null);
     }
     if (user.bannerImage) {
       setBannerImagePreview(
-        `http://localhost:8080/profileUploads/${user.username}/${user.bannerImage}`
+        `http://localhost:8080/api/user/bannerImage/${user.bannerImage}`
       );
     } else {
       setBannerImagePreview(null);
@@ -74,12 +74,12 @@ export const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white rounded-2xl w-[600px] h-[600px] overflow-y-auto p-0.5">
+    <div className="fixed bg-black bg-opacity-50 flex justify-center items-center z-[9999999999999] dark:bg-white dark:bg-opacity-10 w-[100vw] h-full">
+      <div className="bg-white rounded-2xl w-[80%] max-w-[600px] h-[90%] max-h-[600px] overflow-y-auto p-0.5 dark:bg-black dark:text-white">
         <div className="flex items-center justify-between m-2">
           <div className="flex items-center">
             <div
-              className="rounded-full hover:bg-gray-200 w-[32px] h-[32px] mr-10 flex items-center justify-center cursor-pointer transition-colors duration-300"
+              className="rounded-full hover:bg-gray-200 w-[32px] h-[32px] mr-10 flex items-center justify-center cursor-pointer transition-colors duration-300 dark:hover:bg-gray-300 dark:hover:bg-opacity-15"
               onClick={onClose}
             >
               <IoCloseOutline size="24" />
@@ -88,13 +88,13 @@ export const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
           </div>
           <button
             onClick={handleSave}
-            className="px-4 py-1.5 bg-black text-white rounded-full font-semibold"
+            className="px-4 py-1.5 bg-black text-white rounded-full font-semibold dark:bg-white dark:text-black"
           >
             Guardar
           </button>
         </div>
 
-        <div className="w-full h-[200px] bg-slate-300 relative">
+        <div className="w-full h-[200px] bg-slate-300 relative dark:bg-gray-600">
           <div className="absolute inset-0 flex items-center justify-center">
             <label
               htmlFor="bannerImageInput"
@@ -120,11 +120,11 @@ export const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
         </div>
 
         <div className="relative mb-24">
-          <div className="absolute -top-[67px] border-4 rounded-full border-white left-4">
+          <div className="absolute -top-[67px] border-4 rounded-full border-white left-4 dark:border-black">
             <div className="h-[134px] w-[134px] absolute flex items-center justify-center">
               <label
                 htmlFor="profileImageInput"
-                className="w-[42px] h-[42px] rounded-full bg-opacity-60 bg-gray-900 hover:bg-opacity-80 cursor-pointer flex items-center justify-center transition-colors duration-300"
+                className="w-[42px] h-[42px] rounded-full bg-opacity-60 bg-gray-900 hover:bg-opacity-80 cursor-pointer flex items-center justify-center transition-colors duration-300 z-50"
               >
                 <IoCloudUploadOutline
                   size="24"
@@ -150,27 +150,34 @@ export const EditProfileModal = ({ user, isOpen, onClose, onSave }) => {
                 name={user.name}
                 username={user.username}
                 profileImage={user.profileImage}
+                w={"w-134px"}
+                h={"h-134px"}
+                s={"134"}
               />
             )}
           </div>
         </div>
 
         <div className="mb-4 px-4">
-          <label className="block text-gray-700">Nombre</label>
+          <label className="block text-gray-700 dark:text-gray-500">
+            Nombre
+          </label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="border rounded w-full py-2 px-3"
+            className="border rounded w-full py-2 px-3 dark:bg-black dark:border-gray-700"
           />
         </div>
         <div className="mb-4 px-4">
-          <label className="block text-gray-700">Username</label>
+          <label className="block text-gray-700 dark:text-gray-500">
+            Username
+          </label>
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="border rounded w-full py-2 px-3"
+            className="border rounded w-full py-2 px-3 dark:bg-black dark:border-gray-700"
           />
         </div>
       </div>

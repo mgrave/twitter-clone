@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
 .form::-webkit-scrollbar {
   width: 8px;
 }
@@ -32,4 +37,53 @@
 /* styles.css o cualquier archivo de estilos que utilices */
 .no-scroll {
   overflow: hidden;
+}
+
+@media (max-height: 600px) {
+  .xsm-ldb {
+    margin: 0;
+  }
+}
+@media (max-width: 500px) {
+  .xsm {
+    display: none;
+  }
+  .xsm-fh {
+    width: 100%;
+    height: 114px;
+    left: 0;
+  }
+  .xsm-fh-t {
+    display: flex;
+  }
+  .xsm-mnv {
+    display: flex;
+  }
+  .xsm-f {
+    border: none;
+    padding-bottom: 60px;
+    padding-top: 114px;
+  }
+  .xsm-cp {
+    display: none;
+  }
+  .xsm-t-h {
+    top: -100%;
+  }
+  .xsm-fh-v {
+    top: 0;
+  }
+  .xsm-p {
+    border: none;
+    padding-bottom: 60px;
+  }
+  .xsm-f-c {
+    width: 100%;
+  }
+  .xsm-ph {
+    width: 100%;
+  }
+  .xsm-pb {
+    display: flex;
+  }
 }
