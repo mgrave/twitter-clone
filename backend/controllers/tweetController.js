@@ -1,20 +1,52 @@
 import Tweet from "../models/Tweet.js";
 import User from "../models/User.js";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+import { getGridFS } from "../config/gridfsConfig.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const getImage = async (req, res) => {
+  const filename = req.params.filename;
 
-const deleteImage = (imagePath) => {
-  const fullPath = path.resolve(imagePath);
-  console.log(fullPath);
-  fs.unlink(fullPath, (err) => {
-    if (err) {
-      console.error(`Error deleting image: ${err}`);
+  try {
+    const gfs = getGridFS("tweet_images"); // Asegúrate de obtener la instancia de GridFS correctamente inicializada
+
+    // Usa la colección de archivos para encontrar el archivo por su nombre
+    const file = await gfs.find({ filename }).next(); // Obtiene directamente el primer archivo encontrado
+
+    if (!file) {
+      return res.status(404).json({ message: "No file found" });
     }
-  });
+
+    // Verifica que el archivo es una imagen basada en su tipo MIME
+    if (file.contentType.startsWith("image/")) {
+      // Acepta cualquier tipo de imagen
+      // Si es una imagen válida, crea un stream de lectura
+      const readstream = gfs.openDownloadStreamByName(filename);
+      readstream.pipe(res);
+    } else {
+      res.status(400).json({
+        err: "Not an image",
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const deleteImage = async (filename) => {
+  try {
+    const gfs = getGridFS("tweet_images"); // Obtén la instancia de GridFS correctamente inicializada
+    const file = await gfs.find({ filename }).next();
+
+    if (file) {
+      // Elimina el archivo de GridFS utilizando el ID del archivo
+      await gfs.delete(file._id);
+      console.log(`Image ${filename} deleted successfully from GridFS`);
+    } else {
+      console.log(`Image ${filename} not found in GridFS`);
+    }
+  } catch (err) {
+    console.error(`Error deleting image from GridFS: ${err.message}`);
+  }
 };
 
 const createTweet = async (req, res) => {
@@ -45,6 +77,105 @@ const createTweet = async (req, res) => {
     res.status(201).json(populatedTweet);
   } catch (err) {
     res.status(500).json({ message: "Failed to create tweet: " + err.message });
+  }
+};
+
+const updateTweet = async (req, res) => {
+  const tweetId = req.params.tweetId;
+  const { content, removeImage } = req.body;
+  const image = req.file ? req.file.filename : null;
+
+  try {
+    const tweet = await Tweet.findById(tweetId);
+    if (!tweet) {
+      return res.status(404).json({ message: "Tweet not found" });
+    }
+
+    tweet.content = content;
+
+    // Elimina la imagen actual si se indica removeImage
+    if (removeImage && tweet.image) {
+      await deleteImage(tweet.image); // Elimina la imagen de GridFS
+      tweet.image = null;
+    }
+
+    // Si se sube una nueva imagen, elimina la anterior y asigna la nueva
+    if (image) {
+      if (tweet.image) {
+        await deleteImage(tweet.image); // Elimina la imagen anterior de GridFS
+      }
+      tweet.image = image; // Asigna la nueva imagen
+    }
+
+    const updatedTweet = await tweet.save();
+    res
+      .status(200)
+      .json({ message: "Tweet updated successfully", tweet: updatedTweet });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update tweet: " + err.message });
+  }
+};
+
+const deleteTweet = async (req, res) => {
+  try {
+    const tweet = await Tweet.findById(req.params.tweetId);
+
+    if (!tweet) {
+      return res.status(404).json({ message: "Tweet not found" });
+    }
+
+    if (tweet.user.toString() !== req.user._id.toString()) {
+      return res
+        .status(401)
+        .json({ message: "Not authorized to delete this tweet" });
+    }
+
+    const recursiveDelete = async (tweetId) => {
+      const tweetToDelete = await Tweet.findById(tweetId);
+
+      if (tweetToDelete.image) {
+        await deleteImage(tweetToDelete.image);
+      }
+
+      await User.updateMany(
+        { likedTweets: tweetId },
+        { $pull: { likedTweets: tweetId } }
+      );
+      await User.updateMany(
+        { bookmarks: tweetId },
+        { $pull: { bookmarks: tweetId } }
+      );
+      await User.updateMany(
+        { posts: { $elemMatch: { tweet: tweetId } } },
+        { $pull: { posts: { tweet: tweetId } } }
+      );
+
+      const commentsAndRetweets = await Tweet.find({ parentTweet: tweetId });
+
+      for (const childTweet of commentsAndRetweets) {
+        await recursiveDelete(childTweet._id);
+      }
+
+      if (tweetToDelete.parentTweet) {
+        await Tweet.findByIdAndUpdate(tweetToDelete.parentTweet, {
+          $pull: { comments: tweetId },
+        });
+      }
+
+      await tweetToDelete.deleteOne();
+    };
+
+    await recursiveDelete(tweet._id);
+
+    await User.findByIdAndUpdate(req.user._id, {
+      $pull: { posts: { tweet: tweet._id } },
+    });
+
+    res
+      .status(200)
+      .json({ message: "Tweet and related data removed successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to delete tweet: " + err.message });
   }
 };
 
@@ -81,8 +212,9 @@ const getTweetById = async (req, res) => {
 };
 
 const getFollowingTweets = async (req, res) => {
+  const userId = req.params._id;
   try {
-    const user = await User.findById(req.user._id).populate({
+    const user = await User.findById(userId).populate({
       path: "following",
       populate: {
         path: "posts",
@@ -126,105 +258,6 @@ const getFollowingTweets = async (req, res) => {
     res
       .status(500)
       .json({ message: "Failed to retrieve tweets: " + err.message });
-  }
-};
-
-const updateTweet = async (req, res) => {
-  const tweetId = req.params.tweetId;
-  const { content, removeImage } = req.body;
-  const image = req.file ? req.file.filename : null;
-
-  try {
-    const tweet = await Tweet.findById(tweetId);
-    if (!tweet) {
-      return res.status(404).json({ message: "Tweet not found" });
-    }
-
-    tweet.content = content;
-
-    if (removeImage) {
-      if (tweet.image) {
-        deleteImage(path.join(__dirname, "..", "uploads", tweet.image));
-      }
-      tweet.image = null;
-    }
-
-    if (image) {
-      if (tweet.image) {
-        deleteImage(path.join(__dirname, "..", "uploads", tweet.image));
-      }
-      tweet.image = image;
-    }
-
-    const updatedTweet = await tweet.save();
-    res
-      .status(200)
-      .json({ message: "Tweet updated successfully", tweet: updatedTweet });
-  } catch (err) {
-    res.status(500).json({ message: "Failed to update tweet: " + err.message });
-  }
-};
-
-const deleteTweet = async (req, res) => {
-  try {
-    const tweet = await Tweet.findById(req.params.tweetId);
-
-    if (!tweet) {
-      return res.status(404).json({ message: "Tweet not found" });
-    }
-
-    if (tweet.user.toString() !== req.user._id.toString()) {
-      return res
-        .status(401)
-        .json({ message: "Not authorized to delete this tweet" });
-    }
-
-    const recursiveDelete = async (tweetId) => {
-      const tweetToDelete = await Tweet.findById(tweetId);
-
-      if (tweetToDelete.image) {
-        deleteImage(path.join("..", "uploads", tweetToDelete.image));
-      }
-
-      await User.updateMany(
-        { likedTweets: tweetId },
-        { $pull: { likedTweets: tweetId } }
-      );
-      await User.updateMany(
-        { bookmarks: tweetId },
-        { $pull: { bookmarks: tweetId } }
-      );
-      await User.updateMany(
-        { posts: { $elemMatch: { tweet: tweetId } } },
-        { $pull: { posts: { tweet: tweetId } } }
-      );
-
-      const commentsAndRetweets = await Tweet.find({ parentTweet: tweetId });
-
-      for (const childTweet of commentsAndRetweets) {
-        await recursiveDelete(childTweet._id);
-      }
-
-      if (tweetToDelete.parentTweet) {
-        await Tweet.findByIdAndUpdate(tweetToDelete.parentTweet, {
-          $pull: { comments: tweetId },
-        });
-      }
-
-      await tweetToDelete.deleteOne();
-    };
-
-    await recursiveDelete(tweet._id);
-
-    await User.findByIdAndUpdate(req.user._id, {
-      $pull: { posts: { tweet: tweet._id } },
-    });
-
-    res
-      .status(200)
-      .json({ message: "Tweet and related data removed successfully" });
-  } catch (err) {
-    res.status(500).json({ message: "Failed to delete tweet: " + err.message });
   }
 };
 
@@ -365,7 +398,7 @@ const toggleRetweet = async (req, res) => {
 const addComment = async (req, res) => {
   try {
     const { content } = req.body;
-    const image = req.file ? req.file.path : null;
+    const image = req.file ? req.file.filename : null;
 
     const parentTweet = await Tweet.findById(req.params.tweetId);
 
@@ -412,6 +445,7 @@ const addComment = async (req, res) => {
 };
 
 export {
+  getImage,
   createTweet,
   getTweets,
   getTweetById,

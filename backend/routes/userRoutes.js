@@ -1,8 +1,11 @@
 import express from "express";
-import multer from "multer";
 import path from "path";
-import fs from "fs";
+import crypto from "crypto";
+import multer from "multer";
+import GridfsStorage from "multer-gridfs-storage";
+import { protect } from "../middlewares/authMiddleware.js";
 import {
+  getImage,
   registerUser,
   loginUser,
   logoutUser,
@@ -12,45 +15,51 @@ import {
   updateUser,
   toggleFollow,
 } from "../controllers/userController.js";
-import { protect } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-// Configuración del almacenamiento de multer
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const userDir = path.join("profileUploads", req.user.username);
+// Configuración para las imágenes de perfil y banner combinadas
+const profileImagesStorage = new GridfsStorage({
+  url: process.env.MONGO_URI,
+  file: (req, file) => {
+    return new Promise((resolve, reject) => {
+      crypto.randomBytes(16, (err, buf) => {
+        if (err) {
+          return reject(err);
+        }
+        const filename = buf.toString("hex") + path.extname(file.originalname);
 
-    // Crea la carpeta del usuario si no existe
-    if (!fs.existsSync(userDir)) {
-      fs.mkdirSync(userDir, { recursive: true });
-    }
+        // Determina el bucketName en función del tipo de archivo
+        let bucketName = "profile_images";
+        if (file.fieldname === "bannerImage") {
+          bucketName = "banner_images";
+        }
 
-    cb(null, userDir);
-  },
-  filename: function (req, file, cb) {
-    cb(null, `${Date.now()}-${file.originalname}`);
+        const fileInfo = {
+          filename: filename,
+          bucketName: bucketName,
+        };
+        resolve(fileInfo);
+      });
+    });
   },
 });
 
-const upload = multer({ storage });
+// Crear una instancia de `multer` usando el almacenamiento combinado
+const uploadProfileImages = multer({ storage: profileImagesStorage });
 
 router.post("/register", registerUser);
-
 router.post("/login", loginUser);
-
 router.post("/logout", logoutUser);
-
 router.get("/me", protect, getLoggedInUser);
-
 router.get("/profile/:username", getUserByUsername);
-
 router.get("/", protect, getUsers);
 
+// Usar la instancia combinada de `multer` en el endpoint de actualización del perfil
 router.put(
   "/profile/update",
   protect,
-  upload.fields([
+  uploadProfileImages.fields([
     { name: "profileImage", maxCount: 1 },
     { name: "bannerImage", maxCount: 1 },
   ]),
@@ -58,5 +67,8 @@ router.put(
 );
 
 router.put("/follow/:userId", protect, toggleFollow);
+
+router.get("/profileImage/:filename", getImage("profile_images"));
+router.get("/bannerImage/:filename", getImage("banner_images"));
 
 export default router;
