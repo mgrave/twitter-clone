@@ -1,20 +1,53 @@
 import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+import { getGridFS } from "../config/gridfsConfig.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const getImage = (bucketName) => {
+  return async (req, res) => {
+    const filename = req.params.filename;
 
-const deleteImage = (imagePath) => {
-  const fullPath = path.resolve(imagePath);
-  console.log(fullPath);
-  fs.unlink(fullPath, (err) => {
-    if (err) {
-      console.error(`Error deleting image: ${err}`);
+    try {
+      const gfs = getGridFS(bucketName); // Obtén la instancia de GridFS para el bucket correcto
+
+      // Usa la colección de archivos para encontrar el archivo por su nombre
+      const file = await gfs.find({ filename }).next(); // Obtiene directamente el primer archivo encontrado
+
+      if (!file) {
+        return res.status(404).json({ message: "No file found" });
+      }
+
+      // Verifica que el archivo es una imagen basada en su tipo MIME
+      if (file.contentType.startsWith("image/")) {
+        // Acepta cualquier tipo de imagen
+        // Si es una imagen válida, crea un stream de lectura
+        const readstream = gfs.openDownloadStreamByName(filename);
+        readstream.pipe(res);
+      } else {
+        res.status(400).json({
+          err: "Not an image",
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: err.message });
     }
-  });
+  };
+};
+
+const deleteImage = async (filename, bucketName) => {
+  try {
+    const gfs = getGridFS(bucketName); // Inicializa GridFS con el bucket correcto
+    const file = await gfs.find({ filename }).next();
+
+    if (file) {
+      await gfs.delete(file._id);
+      console.log(`Image ${filename} deleted successfully from ${bucketName}`);
+    } else {
+      console.log(`Image ${filename} not found in ${bucketName}`);
+    }
+  } catch (err) {
+    console.error(`Error deleting image from ${bucketName}: ${err.message}`);
+  }
 };
 
 const registerUser = async (req, res) => {
@@ -143,9 +176,11 @@ const getLoggedInUser = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-    const users = await User.find({
-      _id: { $ne: req.user._id },
-    }).select("name username profileImage");
+    const users = await User.aggregate([
+      { $match: { _id: { $ne: req.user._id } } }, // Excluir el usuario actual
+      { $sample: { size: 8 } }, // Seleccionar 8 usuarios aleatorios
+      { $project: { name: 1, username: 1, profileImage: 1 } }, // Seleccionar solo los campos necesarios
+    ]);
 
     res.status(200).json({
       users,
@@ -191,35 +226,24 @@ const updateUser = async (req, res) => {
         message: "User not found",
       });
     }
-
+    console.log(req.files.profileImage);
+    // Manejo de la imagen de perfil
     if (req.files && req.files.profileImage) {
+      const profileImageFile = req.files.profileImage[0];
+      console.log(profileImageFile.filename);
       if (user.profileImage) {
-        deleteImage(
-          path.join(
-            __dirname,
-            "..",
-            "profileUploads",
-            user.username,
-            user.profileImage
-          )
-        );
+        await deleteImage(user.profileImage, "profile_images");
       }
-      user.profileImage = req.files.profileImage[0].filename;
+      user.profileImage = profileImageFile.filename;
     }
 
+    // Manejo de la imagen de banner
     if (req.files && req.files.bannerImage) {
+      const bannerImageFile = req.files.bannerImage[0];
       if (user.bannerImage) {
-        deleteImage(
-          path.join(
-            __dirname,
-            "..",
-            "profileUploads",
-            user.username,
-            user.bannerImage
-          )
-        );
+        await deleteImage(user.bannerImage, "banner_images");
       }
-      user.bannerImage = req.files.bannerImage[0].filename;
+      user.bannerImage = bannerImageFile.filename;
     }
 
     user.name = req.body.name || user.name;
@@ -244,11 +268,9 @@ const updateUser = async (req, res) => {
       createdAt: updatedUser.createdAt,
       message: "Profile updated successfully",
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      message: "Failed to update profile: " + err.message,
-    });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -290,6 +312,7 @@ const toggleFollow = async (req, res) => {
 };
 
 export {
+  getImage,
   registerUser,
   loginUser,
   logoutUser,
