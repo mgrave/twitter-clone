@@ -12,6 +12,8 @@ import ProfileTabs from "../components/ProfileTabs.jsx";
 import { ProfileFeed } from "../components/ProfileFeed.jsx";
 import PostModal from "../components/PostModal.jsx";
 import CommentModal from "../components/CommentModal.jsx";
+import MobileNavbar from "../components/MobileNavbar.jsx";
+import { PostButton } from "../components/PostButton.jsx";
 
 export const Profile = () => {
   const { username } = useParams();
@@ -27,6 +29,8 @@ export const Profile = () => {
   const [showCommentModal, setShowCommentModal] = useState(false);
   const [fetching, setFetching] = useState(false);
   const [selectedTweet, setSelectedTweet] = useState(null);
+
+  const text = isFollowing ? "Siguiendo" : "Seguir";
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -133,30 +137,30 @@ export const Profile = () => {
   };
 
   return (
-    <div className="relative w-full flex">
+    <div className="relative w-[100%] flex bg-white dark:bg-black justify-center">
       <LeftSidebar
         onPostButtonClick={() => setShowPostModal(true)}
         profile={true}
       />
-      <div className="w-[990px] flex mr-[40px] gap-[35px] min-h-[1044px]">
-        <div className="w-[600px] min-h-screen border-gray-200 border pt-14 border-t-0 ">
+      <div className="w-[100%] md:w-auto lg:w-[990px] flex gap-[35px] min-h-[1044px]">
+        <div className="w-[100%] md:min-w-[600px] max-w-[600px] min-h-screen border-gray-200 dark:border-gray-600 border border-t-0 xsm-p relative">
           <ProfileHeader user={user} />
           <div>
-            <div className="w-full h-[200px] bg-slate-300">
+            <div className="max-w-[600px] h-[200px] bg-slate-300 dark:bg-gray-600">
               {user.bannerImage && (
                 <img
-                  src={`http://localhost:8080/profileUploads/${user.username}/${user.bannerImage}`}
+                  src={`http://localhost:8080/api/user/bannerImage/${user.bannerImage}`}
                   alt=""
                   className="w-full h-full object-cover"
                 />
               )}
             </div>
             <div className="relative">
-              <div className="absolute -top-[67px] border-4 rounded-full border-white left-4">
+              <div className="absolute -top-[67px] border-4 rounded-full border-white left-4 dark:border-black">
                 <div className="w-[134px] h-[134px] rounded-full absolute bg-black opacity-0 hover:opacity-15 cursor-pointer transition-colors duration-300"></div>
                 <Avatar
                   name={user.name}
-                  src={`http://localhost:8080/profileUploads/${user.username}/${user.profileImage}`}
+                  src={`http://localhost:8080/api/user/profileImage/${user.profileImage}`}
                   size="134"
                   round={true}
                   className="min-w-[40px] object-cover"
@@ -166,24 +170,37 @@ export const Profile = () => {
             <div className="flex w-full justify-end pt-3 pr-4">
               {isCurrentUser ? (
                 <button
-                  className="px-4 py-1 border-slate-300 border rounded-full font-bold hover:bg-gray-200 transition-colors duration-300"
+                  className="rounded-full py-1.5 px-4 font-semibold pointer transition-colors duration-300 border-slate-300 border hover:bg-gray-200 dark:text-white dark:hover:bg-gray-300 dark:hover:bg-opacity-15"
                   onClick={handleEditProfile}
                 >
                   Editar perfil
                 </button>
               ) : (
                 <button
-                  className={`px-4 py-1 border-slate-300 border rounded-full font-bold hover:bg-gray-200 transition-colors duration-300 ${
-                    isFollowing ? "text-green-500" : ""
+                  className={`group rounded-full py-1.5 px-4 font-semibold pointer transition-colors duration-300 border ${
+                    isFollowing
+                      ? "w-[145px] text-black bg-transparent  border-black hover:bg-red-600 hover:bg-opacity-15 hover:border-red-600 hover:text-red-600 dark:text-white dark:border-gray-600 dark:hover:border-red-600 dark:hover:text-red-600 dark:hover:bg-opacity-15"
+                      : "text-white bg-black hover:bg-gray-800 dark:text-black dark:bg-white dark:hover:bg-gray-200 border-white"
                   }`}
                   onClick={handleFollowToggle}
                 >
-                  {isFollowing ? "Siguiendo" : "Seguir"}
+                  <span
+                    className={`block ${isFollowing && "group-hover:hidden"}`}
+                  >
+                    {text}
+                  </span>
+                  <span
+                    className={`hidden ${isFollowing && "group-hover:block"}`}
+                  >
+                    Dejar de seguir
+                  </span>
                 </button>
               )}
             </div>
-            <div className="w-full mt-[40px] ml-4">
-              <h1 className="font-bold text-2xl">{user.name}</h1>
+            <div className="w-full max-w-[600px] mt-[40px] ml-4">
+              <h1 className="font-bold text-2xl dark:text-white">
+                {user.name}
+              </h1>
               <p className="text-slate-500">@{user.username}</p>
               <div className="flex items-center gap-2 text-slate-500 mt-2">
                 <RxCalendar className="text-slate-600" />
@@ -237,6 +254,8 @@ export const Profile = () => {
         tweet={selectedTweet}
         onCommentCreated={handleCommentCreated}
       />
+      <MobileNavbar onPostButtonClick={() => setShowPostModal(true)} />
+      <PostButton onPostButtonClick={() => setShowPostModal(true)} />
     </div>
   );
 };

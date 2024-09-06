@@ -1,11 +1,11 @@
 /* eslint-disable react/prop-types */
 const ProfileTabs = ({ activeTab, setActiveTab }) => {
   return (
-    <div className="flex items-center justify-evenly border-b border-gray-200 mt-4">
+    <div className="flex items-center justify-evenly border-b border-gray-200 mt-4 dark:border-gray-600">
       <div
         className={`relative cursor-pointer w-full px-4 py-2 text-center ${
           activeTab === "Posts"
-            ? "font-bold text-black"
+            ? "font-bold text-black dark:text-white"
             : "font-semibold text-gray-400"
         }`}
         onClick={() => setActiveTab("Posts")}
@@ -18,7 +18,7 @@ const ProfileTabs = ({ activeTab, setActiveTab }) => {
       <div
         className={`relative cursor-pointer w-full px-4 py-2 text-center ${
           activeTab === "Comments"
-            ? "font-bold text-black"
+            ? "font-bold text-black dark:text-white"
             : "font-semibold text-gray-400"
         }`}
         onClick={() => setActiveTab("Comments")}
@@ -31,7 +31,7 @@ const ProfileTabs = ({ activeTab, setActiveTab }) => {
       <div
         className={`relative cursor-pointer w-full px-4 py-2 text-center ${
           activeTab === "Likes"
-            ? "font-bold text-black"
+            ? "font-bold text-black dark:text-white"
             : "font-semibold text-gray-400"
         }`}
         onClick={() => setActiveTab("Likes")}
@@ -44,7 +44,7 @@ const ProfileTabs = ({ activeTab, setActiveTab }) => {
       <div
         className={`relative cursor-pointer w-full px-4 py-2 text-center ${
           activeTab === "Saved"
-            ? "font-bold text-black"
+            ? "font-bold text-black dark:text-white"
             : "font-semibold text-gray-400"
         }`}
         onClick={() => setActiveTab("Saved")}

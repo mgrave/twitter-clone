@@ -9,6 +9,8 @@ import { CommentList } from "../components/CommentsLIst.jsx";
 import { PostTweet } from "../components/PostTweet.jsx";
 import PostModal from "../components/PostModal.jsx";
 import CommentModal from "../components/CommentModal.jsx";
+import MobileNavbar from "../components/MobileNavbar.jsx";
+import { CommentButton } from "../components/CommentButton.jsx";
 
 export const Post = () => {
   const { tweetId } = useParams();
@@ -24,7 +26,7 @@ export const Post = () => {
     setLoading(true);
     try {
       const response = await instance.get(`/api/tweets/${tweetId}`);
-      setTweet(response.data);
+      setTweet(response.data.tweet);
     } catch (err) {
       setError(err);
     } finally {
@@ -56,7 +58,7 @@ export const Post = () => {
     setShowCommentModal(false);
     try {
       const response = await instance.get(`/api/tweets/${tweetId}`);
-      setTweet(response.data);
+      setTweet(response.data.tweet);
     } catch (err) {
       setError(err);
     } finally {
@@ -65,13 +67,13 @@ export const Post = () => {
   };
 
   return (
-    <div className="relative w-full flex">
+    <div className="relative w-full flex bg-white dark:bg-black justify-center min-h-[1044px]">
       <LeftSidebar
         onPostButtonClick={() => setShowPostModal(true)}
         post={true}
       />
-      <div className="w-[990px] flex mr-[40px] gap-[35px]">
-        <div className="w-[600px] min-h-[1044px] border-gray-200 border pt-14 border-t-0 ">
+      <div className="w-full md:w-auto lg:w-[990px] flex gap-[35px] bg-white dark:bg-black">
+        <div className="w-full md:min-w-[600px] max-w-[600px] min-h-screen border border-t-0 border-gray-200 dark:border-gray-600 bg-white dark:bg-black xsm-p">
           <PostHeader onBack={() => window.history.back()} />
           <PostTweet
             tweet={tweet}
@@ -101,6 +103,8 @@ export const Post = () => {
         tweet={selectedTweet}
         onCommentCreated={handleCommentCreated}
       />
+      <MobileNavbar onPostButtonClick={() => setShowPostModal(true)} />
+      <CommentButton onCommentClick={() => handleCommentClick(tweet)} />
     </div>
   );
 };

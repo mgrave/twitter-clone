@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   FaRegComment,
   FaRegHeart,
@@ -56,27 +56,22 @@ export const PostTweet = ({
   const [imagePreview, setImagePreview] = useState(null);
   const [uploadImage, setUploadImage] = useState(null);
   const [removeImage, setRemoveImage] = useState(false);
+  const optionsRef = useRef(null);
 
   useEffect(() => {
-    const fetchTweetData = async () => {
-      try {
-        const response = await instance.get(`/api/tweets/${_id}`);
-        if (response.status === 200) {
-          setLikes(response.data.likes);
-          setBookmarks(response.data.bookmarks);
-          setRetweets(response.data.retweets);
-
-          setIsLiked(response.data.likes.includes(currentUser._id));
-
-          setIsBookmarked(response.data.bookmarks.includes(currentUser._id));
-
-          setIsRetweeted(response.data.retweets.includes(currentUser._id));
-        }
-      } catch (error) {
-        console.error("Error al obtener los datos del tweet:", error);
+    const handleClickOutside = (event) => {
+      if (optionsRef.current && !optionsRef.current.contains(event.target)) {
+        setShowOptions(false);
       }
     };
 
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
     const checkFollowingStatus = async () => {
       try {
         const response = await instance.get(
@@ -91,10 +86,22 @@ export const PostTweet = ({
         console.error("Error al verificar el estado de seguimiento:", error);
       }
     };
-
-    fetchTweetData();
     checkFollowingStatus();
-  }, [_id, currentUser._id, user._id]);
+
+    setIsLiked(likes.includes(currentUser?._id));
+
+    setIsBookmarked(bookmarks.includes(currentUser?._id));
+
+    setIsRetweeted(retweets.includes(currentUser?._id));
+  }, [
+    _id,
+    bookmarks,
+    currentUser._id,
+    likes,
+    retweets,
+    user._id,
+    user.username,
+  ]);
 
   const handleRetweet = async (event) => {
     event.preventDefault();
@@ -105,7 +112,7 @@ export const PostTweet = ({
       if (response.status === 200) {
         const responses = await instance.get(`/api/tweets/${_id}`);
         setIsRetweeted(!isRetweeted);
-        setRetweets(responses.data.retweets);
+        setRetweets(responses.data.tweet.retweets);
       }
     } catch (error) {
       console.error("Error al retweetear:", error);
@@ -121,7 +128,7 @@ export const PostTweet = ({
       if (response.status === 200) {
         const responses = await instance.get(`/api/tweets/${_id}`);
         setIsLiked(!isLiked);
-        setLikes(responses.data.likes);
+        setLikes(responses.data.tweet.likes);
       }
     } catch (error) {
       console.error("Error al dar like al tweet:", error);
@@ -137,7 +144,7 @@ export const PostTweet = ({
       if (response.status === 200) {
         const responses = await instance.get(`/api/tweets/${_id}`);
         setIsBookmarked(!isBookmarked);
-        setBookmarks(responses.data.bookmarks);
+        setBookmarks(responses.data.tweet.bookmarks);
       }
     } catch (error) {
       console.error("Error al guardar el tweet:", error);
@@ -172,25 +179,26 @@ export const PostTweet = ({
   const handleDelete = async (event) => {
     event.preventDefault();
     event.stopPropagation();
-
     try {
       await instance.delete(`/api/tweets/${_id}`);
       onTweetDelete(_id);
     } catch (error) {
       console.error("Error al eliminar el tweet:", error);
     }
+    setShowOptions(false);
+    navigate(`/`);
   };
 
   const handleEdit = (event) => {
     event.preventDefault();
     event.stopPropagation();
     setIsEditing(true);
+    setShowOptions(false);
   };
 
   const handleImageUpload = (e) => {
     e.preventDefault();
     e.stopPropagation();
-
     const file = e.target.files[0];
     setUploadImage(file);
 
@@ -207,7 +215,6 @@ export const PostTweet = ({
     e.preventDefault();
     e.stopPropagation();
     setTweetImage(null);
-
     const file = e.target.files[0];
     setUploadImage(file);
 
@@ -231,7 +238,6 @@ export const PostTweet = ({
   const handleSaveEdit = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-
     try {
       const formData = new FormData();
       formData.append("content", content);
@@ -252,8 +258,8 @@ export const PostTweet = ({
 
       if (response.status === 200) {
         setIsEditing(false);
-        setContent(response.data.content);
-        setTweetImage(response.data.image);
+        setContent(response.data.tweet.content);
+        setTweetImage(response.data.tweet.image);
         setImagePreview(null);
         setRemoveImage(false);
       }
@@ -283,7 +289,10 @@ export const PostTweet = ({
   };
 
   return (
-    <div className="border-b border-gray-200" onClick={handleClick}>
+    <div
+      className="border-b border-gray-200 dark:border-gray-600"
+      onClick={handleClick}
+    >
       <div className={`${type !== "retweet" ? "pt-4" : "pt-1"} pb-1`}>
         <div className="flex px-4 pb-1 flex-col">
           <div className="flex w-full">
@@ -297,7 +306,7 @@ export const PostTweet = ({
               <div className="flex items-center justify-between mb-3 h-[40px]">
                 <span className="flex flex-col items-start justify-center cursor-pointer">
                   <h1
-                    className="font-bold leading-[20px] hover:underline"
+                    className="font-bold leading-[20px] hover:underline dark:text-white"
                     onClick={handleProfileClick}
                   >
                     {user.name}
@@ -309,22 +318,22 @@ export const PostTweet = ({
                     @{user.username}
                   </p>
                 </span>
-                <div className="relative text-gray-500">
+                <div className="relative text-gray-500" ref={optionsRef}>
                   {!isEditing ? (
                     <>
                       <div
-                        className="p-2.5 hover:bg-sky-200 rounded-full cursor-pointer hover:bg-opacity-60 hover:text-sky-500 transition-colors duration-300"
+                        className="p-2.5 hover:bg-sky-400 hover:bg-opacity-15 rounded-full cursor-pointer hover:text-sky-500 transition-colors duration-300"
                         onClick={handleOptionsClick}
                       >
                         <SlOptions size={"16"} className="text-inherit" />
                       </div>
                       {showOptions && (
-                        <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded-lg shadow-lg z-50 overflow-hidden">
+                        <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded-lg shadow-lg z-50 overflow-hidden dark:bg-black dark:border-gray-600">
                           {user._id === currentUser._id ? (
                             <>
                               {!isEditing ? (
                                 <button
-                                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-900 hover:bg-opacity-5 transition-colors duration-300"
+                                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-700 hover:bg-opacity-5 transition-colors duration-300 dark:text-white dark:hover:bg-gray-300 dark:hover:bg-opacity-15"
                                   onClick={handleEdit}
                                 >
                                   Editar
@@ -333,7 +342,7 @@ export const PostTweet = ({
                                 <></>
                               )}
                               <button
-                                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-900 hover:bg-opacity-5 transition-colors duration-300"
+                                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-700 hover:bg-opacity-5 transition-colors duration-300 dark:text-white dark:hover:bg-gray-300 dark:hover:bg-opacity-15"
                                 onClick={handleDelete}
                               >
                                 Eliminar
@@ -341,7 +350,7 @@ export const PostTweet = ({
                             </>
                           ) : (
                             <button
-                              className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-900 hover:bg-opacity-5 transition-colors duration-300"
+                              className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-700 hover:bg-opacity-5 transition-colors duration-300 dark:text-white"
                               onClick={handleFollow}
                             >
                               {isFollowing ? "Dejar de seguir" : "Seguir"}
@@ -353,13 +362,13 @@ export const PostTweet = ({
                   ) : (
                     <div className="flex gap-1">
                       <button
-                        className="block w-full text-left px-2 py-1 text-black border border-gray-800 hover:bg-gray-900 hover:bg-opacity-5 transition-colors duration-300 rounded-lg"
+                        className="block w-full text-left px-2 py-1 text-black border border-gray-800 hover:bg-gray-900 hover:bg-opacity-5 transition-colors duration-300 rounded-lg dark:text-white dark:border-gray-600 dark:hover:bg-gray-800"
                         onClick={handleCancelEdit}
                       >
                         Cancelar
                       </button>
                       <button
-                        className="block w-full text-left px-2 py-1 text-white bg-black hover:bg-gray-800 rounded-lg transition-colors duration-300"
+                        className="block w-full text-left px-2 py-1 text-white bg-black hover:bg-gray-800 rounded-lg transition-colors duration-300 dark:bg-white dark:text-black dark:hover:bg-gray-200"
                         onClick={handleSaveEdit}
                       >
                         Guardar
@@ -371,7 +380,9 @@ export const PostTweet = ({
             </div>
           </div>
           {!isEditing ? (
-            <p>{content}</p>
+            <p className="text-black dark:text-white block max-w-full break-words">
+              {content}
+            </p>
           ) : (
             <div>
               <textarea
@@ -425,7 +436,7 @@ export const PostTweet = ({
           {tweetImage && (
             <div className="relative">
               <img
-                src={`http://localhost:8080/uploads/${tweetImage}`}
+                src={`http://localhost:8080/api/tweets/image/${tweetImage}`}
                 alt="tweet"
                 className="mt-2 rounded-lg"
               />
@@ -481,12 +492,12 @@ export const PostTweet = ({
           <p className="py-4 text-gray-500 hover:underline cursor-pointer">
             {formattedTweetDate}
           </p>
-          <div className="flex justify-between pt-2 border-t border-gray-200">
+          <div className="flex justify-between pt-2 border-t border-gray-200 dark:border-gray-600">
             <div
               className={`flex items-center hover:text-sky-500 text-gray-400`}
             >
               <div
-                className="p-2.5 hover:bg-sky-200 rounded-full cursor-pointer hover:bg-opacity-60 transition-colors duration-300"
+                className="p-2.5 hover:bg-sky-200 rounded-full cursor-pointer hover:bg-opacity-60 transition-colors duration-300 dark:hover:bg-sky-400 dark:hover:bg-opacity-15"
                 onClick={handleCommentClick}
               >
                 <FaRegComment size={"16"} className="text-inherit" />
@@ -502,7 +513,7 @@ export const PostTweet = ({
               }`}
             >
               <div
-                className={`p-2 hover:bg-green-200 rounded-full cursor-pointer hover:bg-opacity-60 transition-colors duration-300`}
+                className={`p-2 hover:bg-green-200 rounded-full cursor-pointer hover:bg-opacity-60 transition-colors duration-300 dark:hover:bg-green-400 dark:hover:bg-opacity-15`}
                 onClick={handleRetweet}
               >
                 <HiArrowPathRoundedSquare size={20} className="text-inherit" />
@@ -518,7 +529,7 @@ export const PostTweet = ({
               }`}
             >
               <div
-                className="p-2.5 hover:bg-red-200 rounded-full cursor-pointer hover:bg-opacity-60"
+                className="p-2.5 hover:bg-red-200 rounded-full cursor-pointer hover:bg-opacity-60 transition-colors duration-300 dark:hover:bg-red-400 dark:hover:bg-opacity-15"
                 onClick={handleLike}
               >
                 {isLiked ? (
@@ -538,7 +549,7 @@ export const PostTweet = ({
               }`}
             >
               <div
-                className="p-2.5 hover:bg-sky-200 rounded-full cursor-pointer hover:bg-opacity-60 transition-colors duration-300"
+                className="p-2.5 hover:bg-sky-200 rounded-full cursor-pointer hover:bg-opacity-60 transition-colors duration-300 dark:hover:bg-sky-400 dark:hover:bg-opacity-15"
                 onClick={handleBookmark}
               >
                 {isBookmarked ? (

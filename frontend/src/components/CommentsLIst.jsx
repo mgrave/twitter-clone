@@ -12,7 +12,7 @@ export const CommentList = ({ comments, onClick, onCommentClick }) => {
         const commentsData = await Promise.all(
           comments.map(async (commentId) => {
             const { data } = await instance.get(`/api/tweets/${commentId}`);
-            return data;
+            return data.tweet;
           })
         );
         setCommentDetails(commentsData);

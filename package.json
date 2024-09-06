@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "gridfs-stream": "^1.1.1",
+    "multer-gridfs-storage": "^3.0.0"
+  }
+}
