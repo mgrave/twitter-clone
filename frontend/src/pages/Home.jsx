@@ -20,7 +20,7 @@ export const Home = () => {
 
   useEffect(() => {
     fetchUser();
-  }, [fetchUser]);
+  }, []);
 
   const handleTweetClick = (tweet) => {
     navigate(`/post/${tweet._id}`);
