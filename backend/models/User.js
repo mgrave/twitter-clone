@@ -1,6 +1,19 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
+// Define el esquema para los posts
+const postSchema = new mongoose.Schema({
+  tweet: { type: mongoose.Schema.Types.ObjectId, ref: "Tweet", required: true },
+  type: {
+    type: String,
+    enum: ["tweet", "retweet", "comment"],
+    default: "tweet",
+  },
+  createdAt: { type: Date, default: Date.now },
+  username: { type: String, required: true },
+});
+
+// Define el esquema para el usuario
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -39,20 +52,24 @@ const userSchema = new mongoose.Schema(
     },
     profileImage: {
       type: String,
-      default: "default_profile_image_url",
     },
     bannerImage: {
       type: String,
-      default: "default_banner_image_url",
+    },
+    posts: {
+      type: [postSchema],
+      default: [],
     },
   },
   { timestamps: true }
 );
 
+// Método para comparar contraseñas
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
+// Middleware para encriptar contraseñas
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
     next();

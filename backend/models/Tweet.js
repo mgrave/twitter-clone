@@ -1,26 +1,5 @@
 import mongoose from "mongoose";
 
-const commentSchema = new mongoose.Schema(
-  {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: "User",
-    },
-    content: {
-      type: String,
-      required: true,
-    },
-    likes: {
-      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-      default: [],
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
-
 const tweetSchema = new mongoose.Schema(
   {
     user: {
@@ -30,7 +9,9 @@ const tweetSchema = new mongoose.Schema(
     },
     content: {
       type: String,
-      required: true,
+    },
+    image: {
+      type: String,
     },
     likes: {
       type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
@@ -41,8 +22,17 @@ const tweetSchema = new mongoose.Schema(
       default: [],
     },
     comments: {
-      type: [commentSchema],
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Tweet" }],
       default: [],
+    },
+    retweets: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+      default: [],
+    },
+    parentTweet: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tweet",
+      default: null,
     },
   },
   {
