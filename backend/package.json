@@ -5,10 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-<<<<<<< HEAD
     "start": "node index.js",
-=======
->>>>>>> 1f23f6f031ac4ade70322b03e14b7a2403f5902e
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon index.js"
   },
