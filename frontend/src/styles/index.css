@@ -39,6 +39,20 @@ html {
     margin: 0;
   }
 }
+
+@media (max-width: 400px) {
+  .xxsm-n {
+    flex-direction: column;
+  }
+  .xxsm-un {
+    margin-left: 0;
+    line-height: 1.2;
+  }
+  .xxsm {
+    margin-bottom: 8px;
+  }
+}
+
 @media (max-width: 500px) {
   .xsm {
     display: none;

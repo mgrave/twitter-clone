@@ -327,16 +327,16 @@ const Tweet = ({
               profileClick={handleProfileClick}
             />
             <div className="ml-2 w-[calc(100%-48px)]">
-              <div className="flex items-center justify-between">
-                <span className="flex">
+              <div className="flex items-center justify-between h-[40px] xxsm">
+                <span className="flex xxsm-n">
                   <h1
-                    className="font-bold hover:underline text-black dark:text-white"
+                    className="font-bold hover:underline text-black dark:text-white xxsm-un"
                     onClick={handleProfileClick}
                   >
                     {user.name}
                   </h1>
                   <p
-                    className="text-gray-500 flex items-center ml-1"
+                    className="text-gray-500 flex items-center ml-1 xxsm-un"
                     onClick={handleProfileClick}
                   >
                     @{user.username} · {formattedDate}
