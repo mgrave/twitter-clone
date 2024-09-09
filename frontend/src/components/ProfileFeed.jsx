@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import instance from "../utils/axiosConfig.js";
 import Tweet from "./Tweet.jsx";
+import Loader from "./Loader.jsx";
 
 export const ProfileFeed = ({
   username,
@@ -12,10 +13,12 @@ export const ProfileFeed = ({
 }) => {
   const [posts, setPosts] = useState([]);
   const [tweets, setTweets] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setPosts([]);
     const fetchPosts = async () => {
+      setLoading(true);
       try {
         const profileResponse = await instance.get(
           `/api/user/profile/${username}`
@@ -87,6 +90,8 @@ export const ProfileFeed = ({
         }
       } catch (error) {
         console.error("Error fetching posts:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -96,6 +101,8 @@ export const ProfileFeed = ({
   const handleTweetDelete = (tweetId) => {
     setTweets(tweets.filter((tweet) => tweet._id !== tweetId));
   };
+
+  if (loading) return <Loader />;
 
   return (
     <div className="">

@@ -48,7 +48,7 @@ export const Feed = ({ onClick, fetch, onCommentClick, onCreated }) => {
     <div className="w-full md:min-w-[600px] max-w-[600px] min-h-screen border pt-14 border-t-0 border-gray-200 dark:border-gray-600 bg-white dark:bg-black xsm-f">
       <FeedHeader activeTab={activeTab} setActiveTab={setActiveTab} />
       <CreatePost onCreated={onCreated} />
-      {tweets.length <= 0 && (
+      {tweets.length <= 0 && loading === false && (
         <div className="max-w-[600px] flex h-20 justify-center items-center w-full">
           <h1 className="text-white font-bold text-2xl">Not Found</h1>
         </div>

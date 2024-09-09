@@ -17,7 +17,6 @@ html {
 }
 
 .loader {
-  border: 16px solid #000000;
   border-radius: 50%;
   border-top: 16px solid #3498db;
   width: 120px;

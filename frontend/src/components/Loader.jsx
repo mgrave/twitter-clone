@@ -1,7 +1,7 @@
 const Loader = () => {
   return (
     <div className="flex justify-center items-center min-h-screen">
-      <div className="loader"></div>
+      <div className="loader border-[16px] border-white dark:border-black"></div>
     </div>
   );
 };
