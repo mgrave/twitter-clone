@@ -41,9 +41,7 @@ export const Home = () => {
     setFetching(!fetching);
   };
 
-  if (loading || !user) {
-    return <Loader />;
-  }
+  if (loading || !user) return <Loader />;
 
   return (
     <div

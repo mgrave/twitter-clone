@@ -4,12 +4,15 @@ import instance from "../utils/axiosConfig.js";
 import { CreatePost } from "./CreatePost.jsx";
 import Tweet from "./Tweet.jsx";
 import FeedHeader from "./FeedHeader.jsx";
+import Loader from "./Loader.jsx";
 
 export const Feed = ({ onClick, fetch, onCommentClick, onCreated }) => {
   const [tweets, setTweets] = useState([]);
   const [activeTab, setActiveTab] = useState("ForYou");
+  const [loading, setLoading] = useState(true);
 
   const fetchTweets = useCallback(async () => {
+    setLoading(true);
     try {
       let user = JSON.parse(localStorage.getItem("user"));
       const response = await instance.get(
@@ -28,6 +31,8 @@ export const Feed = ({ onClick, fetch, onCommentClick, onCreated }) => {
       }
     } catch (error) {
       console.error("Error fetching tweets:", error);
+    } finally {
+      setLoading(false);
     }
   }, [activeTab]);
 
@@ -38,6 +43,8 @@ export const Feed = ({ onClick, fetch, onCommentClick, onCreated }) => {
   const handleTweetDelete = (tweetId) => {
     setTweets(tweets.filter((tweet) => tweet._id !== tweetId));
   };
+
+  if (loading) return <Loader />;
 
   return (
     <div className="w-full md:min-w-[600px] max-w-[600px] min-h-screen border pt-14 border-t-0 border-gray-200 dark:border-gray-600 bg-white dark:bg-black xsm-f">

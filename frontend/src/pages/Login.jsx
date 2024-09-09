@@ -2,8 +2,11 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import instance from "../utils/axiosConfig.js";
 import { toast } from "react-toastify";
+import Loader from "../components/Loader.jsx";
+import { useAuth } from "../utils/AuthContext.jsx";
 
 export const Login = () => {
+  const { loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -25,6 +28,8 @@ export const Login = () => {
       toast.error("Invalid credentials");
     }
   };
+
+  if (loading) return <Loader />;
 
   return (
     <div

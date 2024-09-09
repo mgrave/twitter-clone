@@ -11,6 +11,7 @@ import PostModal from "../components/PostModal.jsx";
 import CommentModal from "../components/CommentModal.jsx";
 import MobileNavbar from "../components/MobileNavbar.jsx";
 import { CommentButton } from "../components/CommentButton.jsx";
+import Loader from "../components/Loader.jsx";
 
 export const Post = () => {
   const { tweetId } = useParams();
@@ -38,9 +39,6 @@ export const Post = () => {
     fetchTweet();
   }, [fetchTweet, tweetId]);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-
   const handleTweetClick = (tweet) => {
     navigate(`/post/${tweet._id}`);
   };
@@ -65,6 +63,10 @@ export const Post = () => {
       setLoading(false);
     }
   };
+
+  if (loading) return <Loader />;
+
+  if (error) return <div>Error: {error.message}</div>;
 
   return (
     <div className="relative w-full flex bg-white dark:bg-black justify-center min-h-[1044px]">
