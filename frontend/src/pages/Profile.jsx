@@ -202,7 +202,7 @@ export const Profile = () => {
                 </button>
               )}
             </div>
-            <div className="w-full max-w-[600px] mt-[40px] ml-4">
+            <div className="w-full max-w-[600px] mt-[40px] pl-4">
               <h1 className="font-bold text-2xl dark:text-white">
                 {user.name}
               </h1>
