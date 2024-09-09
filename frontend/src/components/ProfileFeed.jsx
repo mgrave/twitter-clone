@@ -105,7 +105,7 @@ export const ProfileFeed = ({
   if (loading)
     return (
       <div className="w-full h-full bg-white dark:bg-black">
-        <Loader />
+        <Loader feed={true} />
       </div>
     );
 

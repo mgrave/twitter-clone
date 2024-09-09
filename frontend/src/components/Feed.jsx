@@ -55,7 +55,7 @@ export const Feed = ({ onClick, fetch, onCommentClick, onCreated }) => {
       )}
       {loading && (
         <div className="max-w-[600px] justify-center items-center w-full">
-          <Loader />
+          <Loader feed={true} />
         </div>
       )}
       {tweets.length > 0 &&
