@@ -54,7 +54,7 @@ export const Feed = ({ onClick, fetch, onCommentClick, onCreated }) => {
         </div>
       )}
       {loading && (
-        <div className="max-w-[600px] justify-center items-center w-full h-full">
+        <div className="max-w-[600px] justify-center items-center w-full h-[600px]">
           <Loader feed={true} />
         </div>
       )}
