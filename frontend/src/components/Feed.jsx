@@ -59,6 +59,7 @@ export const Feed = ({ onClick, fetch, onCommentClick, onCreated }) => {
         </div>
       )}
       {tweets.length > 0 &&
+        loading === false &&
         tweets.map((tweet) => (
           <Tweet
             key={tweet._id}
