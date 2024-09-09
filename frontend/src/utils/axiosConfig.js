@@ -1,7 +1,13 @@
+/* eslint-disable no-undef */
 import axios from "axios";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const SERVER = process.env.SERVERURL;
 
 const instance = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: SERVER,
 });
 
 instance.interceptors.request.use((config) => {
