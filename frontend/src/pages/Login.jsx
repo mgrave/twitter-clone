@@ -29,7 +29,12 @@ export const Login = () => {
     }
   };
 
-  if (loading) return <Loader />;
+  if (loading)
+    return (
+      <div className="w-full h-full bg-white dark:bg-black">
+        <Loader />
+      </div>
+    );
 
   return (
     <div

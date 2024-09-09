@@ -102,7 +102,12 @@ export const ProfileFeed = ({
     setTweets(tweets.filter((tweet) => tweet._id !== tweetId));
   };
 
-  if (loading) return <Loader />;
+  if (loading)
+    return (
+      <div className="w-full h-full bg-white dark:bg-black">
+        <Loader />
+      </div>
+    );
 
   return (
     <div className="">

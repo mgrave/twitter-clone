@@ -105,9 +105,12 @@ export const Profile = () => {
     setIsEditModalOpen(false);
   };
 
-  if (loading) {
-    return <Loader />;
-  }
+  if (loading)
+    return (
+      <div className="w-full h-full bg-white dark:bg-black">
+        <Loader />
+      </div>
+    );
 
   if (error) {
     return <div>Error: {error.message}</div>;

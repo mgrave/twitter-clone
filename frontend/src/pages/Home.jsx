@@ -41,7 +41,12 @@ export const Home = () => {
     setFetching(!fetching);
   };
 
-  if (loading || !user) return <Loader />;
+  if (loading || !user)
+    return (
+      <div className="w-full h-full bg-white dark:bg-black">
+        <Loader />
+      </div>
+    );
 
   return (
     <div
