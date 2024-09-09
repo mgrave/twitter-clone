@@ -14,6 +14,7 @@ import PostModal from "../components/PostModal.jsx";
 import CommentModal from "../components/CommentModal.jsx";
 import MobileNavbar from "../components/MobileNavbar.jsx";
 import { PostButton } from "../components/PostButton.jsx";
+import Loader from "../components/Loader.jsx";
 
 const SERVER = import.meta.env.VITE_SERVER_URL;
 export const Profile = () => {
@@ -105,7 +106,7 @@ export const Profile = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loader />;
   }
 
   if (error) {
