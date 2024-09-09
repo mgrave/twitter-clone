@@ -1,10 +1,6 @@
-/* eslint-disable no-undef */
 import axios from "axios";
-import dotenv from "dotenv";
 
-dotenv.config();
-
-const SERVER = process.env.SERVERURL;
+const SERVER = import.meta.env.SERVERURL;
 
 const instance = axios.create({
   baseURL: SERVER,
