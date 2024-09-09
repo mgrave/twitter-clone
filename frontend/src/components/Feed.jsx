@@ -13,9 +13,7 @@ export const Feed = ({ onClick, fetch, onCommentClick, onCreated }) => {
     try {
       let user = JSON.parse(localStorage.getItem("user"));
       const response = await instance.get(
-        `http://localhost:8080/api/tweets/${
-          activeTab === "ForYou" ? "" : `following/${user._id}`
-        }`
+        `/api/tweets/${activeTab === "ForYou" ? "" : `following/${user._id}`}`
       );
       if (activeTab === "Following") {
         const followingTweets = response.data.tweets.map((post) => ({
