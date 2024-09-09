@@ -18,6 +18,7 @@ import { IoClose } from "react-icons/io5";
 import { timeSince } from "../utils/timeSince.js";
 import { ProfileAvatar } from "./ProfileAvatar.jsx";
 
+const SERVER = import.meta.env.VITE_SERVER_URL;
 const Tweet = ({
   tweet,
   onClick,
@@ -457,7 +458,7 @@ const Tweet = ({
               {tweetImage && (
                 <div className="relative">
                   <img
-                    src={`http://localhost:8080/api/tweets/image/${tweetImage}`}
+                    src={`${SERVER}/api/tweets/image/${tweetImage}`}
                     alt="tweet"
                     className="mt-2 rounded-lg max-h-[550px]"
                   />

@@ -18,6 +18,7 @@ import { IoClose } from "react-icons/io5";
 import { tweetDate } from "../utils/tweetDate.js";
 import { ProfileAvatar } from "./ProfileAvatar.jsx";
 
+const SERVER = import.meta.env.VITE_SERVER_URL;
 export const PostTweet = ({
   tweet,
   onClick,
@@ -436,7 +437,7 @@ export const PostTweet = ({
           {tweetImage && (
             <div className="relative">
               <img
-                src={`http://localhost:8080/api/tweets/image/${tweetImage}`}
+                src={`${SERVER}}/api/tweets/image/${tweetImage}`}
                 alt="tweet"
                 className="mt-2 rounded-lg"
               />
