@@ -64,7 +64,7 @@ const FeedHeader = ({ activeTab, setActiveTab }) => {
     <div
       className={`${
         isHeaderVisible ? "xsm-fh-v" : "xsm-t-h"
-      } flex flex-col items-center fixed w-[calc(100%-70px)] max-w-[598px] top-0 h-[57px] z-50 transition-all duration-500 xsm-fh`}
+      } flex flex-col items-center fixed w-[calc(100%-70px)] max-w-[598px] top-0 h-[57px] z-50 transition-all duration-300 xsm-fh`}
     >
       <div
         className={`w-full hidden items-center justify-between h-[57px] px-4 dark:bg-black bg-white z-40 xsm-fh-t`}
