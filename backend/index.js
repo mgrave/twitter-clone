@@ -15,7 +15,12 @@ const PORT = process.env.PORT || 5000;
 await connectDB();
 await connectGridFS();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: ["https://twitter-clone-pi-puce.vercel.app"],
+    credentials: true,
+  })
+);
 app.use(morgan("dev"));
 app.use(express.json());
 
