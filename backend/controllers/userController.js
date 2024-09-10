@@ -121,7 +121,6 @@ const recursiveDeleteUser = async (userId) => {
   }
 };
 
-// Registrar usuario con temporizador para eliminarlo después de 5 minutos
 const registerUser = async (req, res) => {
   try {
     const { name, username, email, password } = req.body;
@@ -130,7 +129,6 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: "All fields are required." });
     }
 
-    // Verificar límite de usuarios
     const userCount = await User.countDocuments();
     if (userCount >= 30) {
       return res
@@ -138,13 +136,11 @@ const registerUser = async (req, res) => {
         .json({ message: "User limit reached. Please try again later." });
     }
 
-    // Verificar si el usuario ya existe
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: "User already exists." });
     }
 
-    // Crear el nuevo usuario
     const user = new User({ name, username, email, password });
     const savedUser = await user.save();
 
@@ -158,10 +154,11 @@ const registerUser = async (req, res) => {
         message: "User registered successfully",
       });
 
-      // Programar la eliminación automática después de 5 minutos
+      console.log("Setting timeout for user deletion.");
       setTimeout(async () => {
+        console.log("Running recursiveDeleteUser for user:", savedUser._id);
         await recursiveDeleteUser(savedUser._id);
-      }, 60000); // 300000ms = 5 minutos
+      }, 60000); // 1 minuto
     } else {
       res.status(400).json({ message: "Failed to save user." });
     }
