@@ -39,6 +39,19 @@ html {
   }
 }
 
+@media (max-width: 768px) {
+  .sm-r {
+    flex-direction: column;
+  }
+  .sm-t {
+    width: 25vh;
+  }
+  .sm-t-r {
+    width: 15vh;
+    margin-top: 1rem;
+  }
+}
+
 @media (max-width: 400px) {
   .xxsm-n {
     flex-direction: column;
@@ -49,6 +62,9 @@ html {
   }
   .xxsm {
     margin-bottom: 8px;
+  }
+  .sm-l {
+    width: 70%;
   }
 }
 

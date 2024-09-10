@@ -1,6 +1,8 @@
 import User from "../models/User.js";
+import Tweet from "../models/Tweet.js";
 import generateToken from "../utils/generateToken.js";
 import { getGridFS } from "../config/gridfsConfig.js";
+import { recursiveDelete } from "./tweetController.js";
 
 const getImage = (bucketName) => {
   return async (req, res) => {
@@ -50,30 +52,100 @@ const deleteImage = async (filename, bucketName) => {
   }
 };
 
+const recursiveDeleteUser = async (userId) => {
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      console.log(`User with ID ${userId} not found.`);
+      return;
+    }
+
+    // Eliminar imágenes de perfil y banner si existen
+    if (user.profileImage) {
+      await deleteImage(user.profileImage, "profile_images");
+    }
+    if (user.bannerImage) {
+      await deleteImage(user.bannerImage, "banner_images");
+    }
+
+    // Obtener todos los tweets que el usuario ha "likado", guardado o retweeteado
+    const userLikedTweets = user.likedTweets;
+    const userBookmarkedTweets = user.bookmarks;
+
+    // Actualizar los tweets que el usuario ha "likado"
+    await Tweet.updateMany(
+      { _id: { $in: userLikedTweets } },
+      { $pull: { likes: userId } }
+    );
+
+    // Actualizar los tweets que el usuario ha guardado
+    await Tweet.updateMany(
+      { _id: { $in: userBookmarkedTweets } },
+      { $pull: { bookmarks: userId } }
+    );
+
+    // Obtener todos los tweets que el usuario ha retweeteado
+    const userRetweets = user.posts
+      .filter((post) => post.type === "retweet")
+      .map((post) => post.tweet);
+
+    // Actualizar los tweets que el usuario ha retweeteado
+    await Tweet.updateMany(
+      { _id: { $in: userRetweets } },
+      { $pull: { retweets: userId } }
+    );
+
+    // Eliminar todos los tweets del usuario
+    const userTweets = await Tweet.find({ user: userId });
+    for (const tweet of userTweets) {
+      await recursiveDelete(tweet._id);
+    }
+
+    // Eliminar el propio usuario
+    await user.deleteOne();
+    console.log(`User ${userId} and related data deleted successfully.`);
+
+    // Eliminar las referencias de seguidores en otros usuarios
+    await User.updateMany(
+      { following: userId },
+      { $pull: { following: userId } }
+    );
+
+    await User.updateMany(
+      { followers: userId },
+      { $pull: { followers: userId } }
+    );
+  } catch (error) {
+    console.error(`Error deleting user ${userId}: ${error.message}`);
+  }
+};
+
+// Registrar usuario con temporizador para eliminarlo después de 5 minutos
 const registerUser = async (req, res) => {
   try {
     const { name, username, email, password } = req.body;
 
     if (!name || !username || !email || !password) {
-      return res.status(400).json({
-        message: "All fields are required.",
-      });
+      return res.status(400).json({ message: "All fields are required." });
     }
 
+    // Verificar límite de usuarios
+    const userCount = await User.countDocuments();
+    if (userCount >= 30) {
+      return res
+        .status(400)
+        .json({ message: "User limit reached. Please try again later." });
+    }
+
+    // Verificar si el usuario ya existe
     const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({
-        message: "User already exists.",
-      });
+      return res.status(400).json({ message: "User already exists." });
     }
 
-    const user = new User({
-      name,
-      username,
-      email,
-      password,
-    });
-
+    // Crear el nuevo usuario
+    const user = new User({ name, username, email, password });
     const savedUser = await user.save();
 
     if (savedUser) {
@@ -85,16 +157,19 @@ const registerUser = async (req, res) => {
         token: generateToken(savedUser._id),
         message: "User registered successfully",
       });
+
+      // Programar la eliminación automática después de 5 minutos
+      setTimeout(async () => {
+        await recursiveDeleteUser(savedUser._id);
+      }, 60000); // 300000ms = 5 minutos
     } else {
-      res.status(400).json({
-        message: "Failed to save user.",
-      });
+      res.status(400).json({ message: "Failed to save user." });
     }
   } catch (err) {
     console.error(err);
-    res.status(500).json({
-      message: "Failed to register user: " + err.message,
-    });
+    res
+      .status(500)
+      .json({ message: "Failed to register user: " + err.message });
   }
 };
 

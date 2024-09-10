@@ -61,7 +61,7 @@ export const LeftSidebar = ({ onPostButtonClick, profile, post }) => {
               viewBox="0 0 24 24"
               aria-hidden="true"
               width="32px"
-              fill="dark:#fff"
+              className="dark:fill-white fill-black"
             >
               <g>
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.9 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
@@ -251,10 +251,7 @@ export const LeftSidebar = ({ onPostButtonClick, profile, post }) => {
           </button>
           {showOptions && (
             <div className="absolute bottom-16 left-0 bg-white dark:bg-gray-800 rounded-2xl w-[275px] shadow-[0_2px_10px_2px_rgba(0,0,0,0.2)] overflow-hidden">
-              <button
-                className="w-full h-[56px] flex justify-between items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors duration-300"
-                onClick={handleLogout}
-              >
+              <button className="w-full h-[56px] flex justify-between items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors duration-300">
                 <div className="flex items-center">
                   <ProfileAvatar
                     name={user.name}
