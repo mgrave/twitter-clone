@@ -85,10 +85,10 @@ export const CreatePost = ({ onCreated }) => {
 
       // Verificar si el error es un 403
       if (err.response && err.response.status === 403) {
-        toast.success("Has alcanzado el límite de 5 tweets creados");
+        toast.success("You have reached the limit of 5 created tweets");
       } else {
         console.error("Error al crear el tweet:", err);
-        toast.error("Hubo un error al crear el tweet. Inténtalo de nuevo.");
+        toast.error("There was an error creating the tweet. Please try again.");
       }
     }
   };

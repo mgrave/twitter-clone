@@ -5,6 +5,7 @@ import { useAuth } from "../utils/AuthContext.jsx";
 import { GrImage } from "react-icons/gr";
 import instance from "../utils/axiosConfig.js";
 import { ProfileAvatar } from "./ProfileAvatar.jsx";
+import { toast } from "react-toastify";
 
 const PostModal = ({ isOpen, onClose, onTweetCreated }) => {
   const [tweetContent, setTweetContent] = useState("");
@@ -69,7 +70,17 @@ const PostModal = ({ isOpen, onClose, onTweetCreated }) => {
       setImagePreview(null);
       onTweetCreated();
     } catch (err) {
-      console.error("Error al crear el tweet:", err);
+      setTweetContent("");
+      setImage(null);
+      setImagePreview(null);
+
+      // Verificar si el error es un 403
+      if (err.response && err.response.status === 403) {
+        toast.success("You have reached the limit of 5 created tweets");
+      } else {
+        console.error("Error al crear el tweet:", err);
+        toast.error("There was an error creating the tweet. Please try again.");
+      }
     }
   };
 
