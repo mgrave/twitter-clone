@@ -158,7 +158,7 @@ const registerUser = async (req, res) => {
       setTimeout(async () => {
         console.log("Running recursiveDeleteUser for user:", savedUser._id);
         await recursiveDeleteUser(savedUser._id);
-      }, 60000); // 1 minuto
+      }, 300000); // 1 minuto
     } else {
       res.status(400).json({ message: "Failed to save user." });
     }
