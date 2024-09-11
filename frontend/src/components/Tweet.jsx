@@ -120,68 +120,86 @@ const Tweet = ({
 
     fetchTweetData();
     checkFollowingStatus();
-  }, [_id, currentUser._id, user._id, user.username]);
+  }, []);
 
   const handleLike = async (event) => {
     event.preventDefault();
     event.stopPropagation();
-    setIsLiked(!isLiked);
-    if (isLiked) {
-      setLikes(likes + 1);
-    } else {
-      setLikes(likes - 1);
-    }
+
+    // Usar el valor anterior de isLiked para asegurarse de que se actualice correctamente
+    setIsLiked((prevIsLiked) => {
+      if (!prevIsLiked) {
+        setLikes([...likes, username]); // Agregar like si no está marcado
+      } else {
+        setLikes(likes.filter((user) => user !== username)); // Quitar like si ya está marcado
+      }
+      return !prevIsLiked; // Invertir el estado de like
+    });
+
     try {
       const response = await instance.put(`/api/tweets/${_id}/like`);
       if (response.status === 200) {
-        setLikes(response.data.tweet.likes);
+        setLikes(response.data.tweet.likes); // Actualizar likes con el valor del servidor
       } else {
-        setIsLiked(!isLiked);
+        setIsLiked((prev) => !prev); // Revertir el cambio si la respuesta no es exitosa
       }
     } catch (error) {
       console.error("Error al dar like al tweet:", error);
+      setIsLiked((prev) => !prev); // Revertir el cambio en caso de error
     }
   };
 
   const handleBookmark = async (event) => {
     event.preventDefault();
     event.stopPropagation();
-    setIsBookmarked(!isBookmarked);
-    if (isBookmarked) {
-      setBookmarks(bookmarks + 1);
-    } else {
-      setBookmarks(bookmarks - 1);
-    }
+
+    // Usar el valor anterior de isBookmarked para asegurarte de que se actualice correctamente
+    setIsBookmarked((prevIsBookmarked) => {
+      if (!prevIsBookmarked) {
+        setBookmarks([...bookmarks, username]); // Agregar bookmark si no está marcado
+      } else {
+        setBookmarks(bookmarks.filter((user) => user !== username)); // Quitar bookmark si ya está marcado
+      }
+      return !prevIsBookmarked; // Invertir el estado de bookmark
+    });
+
     try {
       const response = await instance.put(`/api/tweets/${_id}/bookmark`);
       if (response.status === 200) {
-        setBookmarks(response.data.tweet.bookmarks);
+        setBookmarks(response.data.tweet.bookmarks); // Actualizar bookmarks con el valor del servidor
       } else {
-        setIsBookmarked(!isBookmarked);
+        setIsBookmarked((prev) => !prev); // Revertir el cambio si la respuesta no es exitosa
       }
     } catch (error) {
       console.error("Error al guardar el tweet:", error);
+      setIsBookmarked((prev) => !prev); // Revertir el cambio en caso de error
     }
   };
 
   const handleRetweet = async (event) => {
     event.preventDefault();
     event.stopPropagation();
-    setIsRetweeted(!isRetweeted);
-    if (isRetweeted) {
-      setRetweets(retweets + 1);
-    } else {
-      setRetweets(retweets - 1);
-    }
+
+    // Usar el valor anterior de isRetweeted para asegurarse de que se actualice correctamente
+    setIsRetweeted((prevIsRetweeted) => {
+      if (!prevIsRetweeted) {
+        setRetweets([...retweets, username]); // Agregar retweet si no está marcado
+      } else {
+        setRetweets(retweets.filter((user) => user !== username)); // Quitar retweet si ya está marcado
+      }
+      return !prevIsRetweeted; // Invertir el estado de retweet
+    });
+
     try {
       const response = await instance.post(`/api/tweets/${_id}/retweet`);
       if (response.status === 200) {
-        setRetweets(response.data.tweet.retweets);
+        setRetweets(response.data.tweet.retweets); // Actualizar retweets con el valor del servidor
       } else {
-        setIsRetweeted(!isRetweeted);
+        setIsRetweeted((prev) => !prev); // Revertir el cambio si la respuesta no es exitosa
       }
     } catch (error) {
       console.error("Error al retweetear:", error);
+      setIsRetweeted((prev) => !prev); // Revertir el cambio en caso de error
     }
   };
 
@@ -200,10 +218,9 @@ const Tweet = ({
   const handleFollow = async (event) => {
     event.preventDefault();
     event.stopPropagation();
-    setIsFollowing(!isFollowing);
     try {
       const response = await instance.put(`/api/user/follow/${user._id}`);
-      if (response.status !== 200) {
+      if (response.status === 200) {
         setIsFollowing(!isFollowing);
       }
     } catch (error) {

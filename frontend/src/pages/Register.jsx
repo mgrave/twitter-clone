@@ -24,7 +24,6 @@ export const Register = () => {
         toast.info(
           "Registered successfully! Your account will expire in 5 minutes."
         );
-
         // Guardar tiempo de expiración en localStorage
         const expirationTime = Date.now() + 300000; // 5 minutos en milisegundos
         localStorage.setItem("accountExpiration", expirationTime);
@@ -33,9 +32,12 @@ export const Register = () => {
         navigate("/login");
       }
     } catch (err) {
-      if (err.status === 401) {
+      // Aquí verificamos el código de estado del error
+      if (err.response && err.response.status === 401) {
         toast.info("User limit reached. Please try again later.");
-      } else toast.error("Registration failed");
+      } else {
+        toast.error("Registration failed");
+      }
     }
   };
 
