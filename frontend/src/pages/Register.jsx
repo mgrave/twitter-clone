@@ -21,7 +21,7 @@ export const Register = () => {
       });
 
       if (response.status === 201) {
-        toast.success(
+        toast.info(
           "Registered successfully! Your account will expire in 5 minutes."
         );
 
@@ -31,8 +31,9 @@ export const Register = () => {
 
         // Redirigir inmediatamente
         navigate("/login");
-      } else {
-        toast.error("Registration failed.");
+      }
+      if (response.status === 401) {
+        toast.info("User limit reached. Please try again later.");
       }
     } catch (err) {
       toast.error("Registration failed");

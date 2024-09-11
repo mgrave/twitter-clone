@@ -127,9 +127,9 @@ const Tweet = ({
     event.stopPropagation();
     setIsLiked(!isLiked);
     if (isLiked) {
-      setLikes(initialLikes + 1);
+      setLikes(likes + 1);
     } else {
-      setLikes(initialLikes);
+      setLikes(likes - 1);
     }
     try {
       const response = await instance.put(`/api/tweets/${_id}/like`);
@@ -147,9 +147,9 @@ const Tweet = ({
     event.stopPropagation();
     setIsBookmarked(!isBookmarked);
     if (isBookmarked) {
-      setBookmarks(initialBookmarks + 1);
+      setBookmarks(bookmarks + 1);
     } else {
-      setBookmarks(initialBookmarks);
+      setBookmarks(bookmarks - 1);
     }
     try {
       const response = await instance.put(`/api/tweets/${_id}/bookmark`);
@@ -168,9 +168,9 @@ const Tweet = ({
     event.stopPropagation();
     setIsRetweeted(!isRetweeted);
     if (isRetweeted) {
-      setRetweets(initialRetweets + 1);
+      setRetweets(retweets + 1);
     } else {
-      setRetweets(initialRetweets);
+      setRetweets(retweets - 1);
     }
     try {
       const response = await instance.post(`/api/tweets/${_id}/retweet`);

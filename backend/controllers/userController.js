@@ -132,7 +132,7 @@ const registerUser = async (req, res) => {
     const userCount = await User.countDocuments();
     if (userCount >= 30) {
       return res
-        .status(400)
+        .status(401)
         .json({ message: "User limit reached. Please try again later." });
     }
 
