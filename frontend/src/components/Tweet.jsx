@@ -125,6 +125,12 @@ const Tweet = ({
   const handleLike = async (event) => {
     event.preventDefault();
     event.stopPropagation();
+    setIsLiked(!isLiked);
+    if (isLiked) {
+      setLikes(initialLikes + 1);
+    } else {
+      setLikes(initialLikes);
+    }
     try {
       const response = await instance.put(`/api/tweets/${_id}/like`);
       if (response.status === 200) {
@@ -139,11 +145,18 @@ const Tweet = ({
   const handleBookmark = async (event) => {
     event.preventDefault();
     event.stopPropagation();
+    setIsBookmarked(!isBookmarked);
+    if (isBookmarked) {
+      setBookmarks(initialBookmarks + 1);
+    } else {
+      setBookmarks(initialBookmarks);
+    }
     try {
       const response = await instance.put(`/api/tweets/${_id}/bookmark`);
       if (response.status === 200) {
-        setIsBookmarked(!isBookmarked);
         setBookmarks(response.data.tweet.bookmarks);
+      } else {
+        setIsBookmarked(!isBookmarked);
       }
     } catch (error) {
       console.error("Error al guardar el tweet:", error);
@@ -153,11 +166,18 @@ const Tweet = ({
   const handleRetweet = async (event) => {
     event.preventDefault();
     event.stopPropagation();
+    setIsRetweeted(!isRetweeted);
+    if (isRetweeted) {
+      setRetweets(initialRetweets + 1);
+    } else {
+      setRetweets(initialRetweets);
+    }
     try {
       const response = await instance.post(`/api/tweets/${_id}/retweet`);
       if (response.status === 200) {
-        setIsRetweeted(!isRetweeted);
         setRetweets(response.data.tweet.retweets);
+      } else {
+        setIsRetweeted(!isRetweeted);
       }
     } catch (error) {
       console.error("Error al retweetear:", error);
@@ -179,9 +199,10 @@ const Tweet = ({
   const handleFollow = async (event) => {
     event.preventDefault();
     event.stopPropagation();
+    setIsFollowing(!isFollowing);
     try {
       const response = await instance.put(`/api/user/follow/${user._id}`);
-      if (response.status === 200) {
+      if (response.status !== 200) {
         setIsFollowing(!isFollowing);
       }
     } catch (error) {

@@ -22,11 +22,11 @@ export const Register = () => {
 
       if (response.status === 201) {
         toast.success(
-          "Registered successfully! Your account will expire in 1 minutes."
+          "Registered successfully! Your account will expire in 5 minutes."
         );
 
         // Guardar tiempo de expiración en localStorage
-        const expirationTime = Date.now() + 60000; // 5 minutos en milisegundos
+        const expirationTime = Date.now() + 300000; // 5 minutos en milisegundos
         localStorage.setItem("accountExpiration", expirationTime);
 
         // Redirigir inmediatamente
