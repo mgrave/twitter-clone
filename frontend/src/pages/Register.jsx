@@ -32,11 +32,10 @@ export const Register = () => {
         // Redirigir inmediatamente
         navigate("/login");
       }
-      if (response.status === 401) {
-        toast.info("User limit reached. Please try again later.");
-      }
     } catch (err) {
-      toast.error("Registration failed");
+      if (err.status === 401) {
+        toast.info("User limit reached. Please try again later.");
+      } else toast.error("Registration failed");
     }
   };
 

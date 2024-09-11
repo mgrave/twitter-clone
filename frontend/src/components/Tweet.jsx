@@ -134,8 +134,9 @@ const Tweet = ({
     try {
       const response = await instance.put(`/api/tweets/${_id}/like`);
       if (response.status === 200) {
-        setIsLiked(!isLiked);
         setLikes(response.data.tweet.likes);
+      } else {
+        setIsLiked(!isLiked);
       }
     } catch (error) {
       console.error("Error al dar like al tweet:", error);
