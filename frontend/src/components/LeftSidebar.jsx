@@ -181,9 +181,9 @@ export const LeftSidebar = ({ onPostButtonClick, profile, post }) => {
                 </div>
               </button>
               {showMoreOptions && (
-                <div className="absolute top-16 left-0 bg-white dark:bg-gray-800 rounded-2xl w-[160px] shadow-[0_2px_10px_2px_rgba(0,0,0,0.2)] overflow-hidden cursor-pointer z-[999999999999]">
+                <div className="absolute top-16 left-0 bg-white dark:bg-gray-800 rounded-2xl w-[170px] shadow-[0_2px_10px_2px_rgba(0,0,0,0.2)] overflow-hidden cursor-pointer z-[999999999999]">
                   <label className="w-full h-[56px] text-left p-3 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors duration-300 cursor-pointer">
-                    <span className="dark:text-white">Dark Mode</span>
+                    <span className="dark:text-white">Modo oscuro</span>
                     <input
                       type="checkbox"
                       checked={theme}

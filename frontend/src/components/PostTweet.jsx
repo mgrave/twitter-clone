@@ -437,7 +437,7 @@ export const PostTweet = ({
           {tweetImage && (
             <div className="relative">
               <img
-                src={`${SERVER}}/api/tweets/image/${tweetImage}`}
+                src={`${SERVER}/api/tweets/image/${tweetImage}`}
                 alt="tweet"
                 className="mt-2 rounded-lg"
               />
