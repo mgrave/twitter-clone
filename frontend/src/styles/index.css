@@ -4,7 +4,6 @@
 
 html {
   scroll-behavior: smooth;
-  overflow-x: hidden;
 }
 
 .form::-webkit-scrollbar {
@@ -17,11 +16,6 @@ html {
 }
 
 .loader {
-  border: 16px solid #000000;
-  border-radius: 50%;
-  border-top: 16px solid #3498db;
-  width: 120px;
-  height: 120px;
   animation: spin 2s linear infinite;
 }
 
@@ -44,6 +38,36 @@ html {
     margin: 0;
   }
 }
+
+@media (max-width: 768px) {
+  .sm-r {
+    flex-direction: column;
+  }
+  .sm-t {
+    width: 25vh;
+  }
+  .sm-t-r {
+    width: 15vh;
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .xxsm-n {
+    flex-direction: column;
+  }
+  .xxsm-un {
+    margin-left: 0;
+    line-height: 1.2;
+  }
+  .xxsm {
+    margin-bottom: 8px;
+  }
+  .sm-l {
+    width: 70%;
+  }
+}
+
 @media (max-width: 500px) {
   .xsm {
     display: none;

@@ -32,6 +32,41 @@ const getImage = async (req, res) => {
   }
 };
 
+const recursiveDelete = async (tweetId) => {
+  const tweetToDelete = await Tweet.findById(tweetId);
+
+  if (tweetToDelete.image) {
+    await deleteImage(tweetToDelete.image);
+  }
+
+  await User.updateMany(
+    { likedTweets: tweetId },
+    { $pull: { likedTweets: tweetId } }
+  );
+  await User.updateMany(
+    { bookmarks: tweetId },
+    { $pull: { bookmarks: tweetId } }
+  );
+  await User.updateMany(
+    { posts: { $elemMatch: { tweet: tweetId } } },
+    { $pull: { posts: { tweet: tweetId } } }
+  );
+
+  const commentsAndRetweets = await Tweet.find({ parentTweet: tweetId });
+
+  for (const childTweet of commentsAndRetweets) {
+    await recursiveDelete(childTweet._id);
+  }
+
+  if (tweetToDelete.parentTweet) {
+    await Tweet.findByIdAndUpdate(tweetToDelete.parentTweet, {
+      $pull: { comments: tweetId },
+    });
+  }
+
+  await tweetToDelete.deleteOne();
+};
+
 const deleteImage = async (filename) => {
   try {
     const gfs = getGridFS("tweet_images"); // Obtén la instancia de GridFS correctamente inicializada
@@ -54,6 +89,17 @@ const createTweet = async (req, res) => {
   const image = req.file ? req.file.filename : null;
 
   try {
+    // Contar el número de tweets que ya existen en la base de datos
+    const tweetCount = await Tweet.countDocuments();
+
+    // Verificar si ya se alcanzó el límite de 33 tweets
+    if (tweetCount >= 33) {
+      return res
+        .status(403)
+        .json({ message: "Tweet limit reached. Cannot create more tweets." });
+    }
+
+    // Crear el nuevo tweet si el límite no se ha alcanzado
     const newTweet = await Tweet.create({
       user: req.user._id,
       content,
@@ -129,41 +175,6 @@ const deleteTweet = async (req, res) => {
         .status(401)
         .json({ message: "Not authorized to delete this tweet" });
     }
-
-    const recursiveDelete = async (tweetId) => {
-      const tweetToDelete = await Tweet.findById(tweetId);
-
-      if (tweetToDelete.image) {
-        await deleteImage(tweetToDelete.image);
-      }
-
-      await User.updateMany(
-        { likedTweets: tweetId },
-        { $pull: { likedTweets: tweetId } }
-      );
-      await User.updateMany(
-        { bookmarks: tweetId },
-        { $pull: { bookmarks: tweetId } }
-      );
-      await User.updateMany(
-        { posts: { $elemMatch: { tweet: tweetId } } },
-        { $pull: { posts: { tweet: tweetId } } }
-      );
-
-      const commentsAndRetweets = await Tweet.find({ parentTweet: tweetId });
-
-      for (const childTweet of commentsAndRetweets) {
-        await recursiveDelete(childTweet._id);
-      }
-
-      if (tweetToDelete.parentTweet) {
-        await Tweet.findByIdAndUpdate(tweetToDelete.parentTweet, {
-          $pull: { comments: tweetId },
-        });
-      }
-
-      await tweetToDelete.deleteOne();
-    };
 
     await recursiveDelete(tweet._id);
 
@@ -446,6 +457,7 @@ const addComment = async (req, res) => {
 
 export {
   getImage,
+  recursiveDelete,
   createTweet,
   getTweets,
   getTweetById,

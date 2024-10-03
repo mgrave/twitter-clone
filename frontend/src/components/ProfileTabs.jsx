@@ -23,7 +23,7 @@ const ProfileTabs = ({ activeTab, setActiveTab }) => {
         }`}
         onClick={() => setActiveTab("Comments")}
       >
-        Comments
+        Respuestas
         {activeTab === "Comments" && (
           <div className="w-24 h-1 bg-sky-500 absolute bottom-0 rounded left-[50%] -translate-x-[50%]"></div>
         )}
@@ -49,9 +49,9 @@ const ProfileTabs = ({ activeTab, setActiveTab }) => {
         }`}
         onClick={() => setActiveTab("Saved")}
       >
-        Saved
+        Guardados
         {activeTab === "Saved" && (
-          <div className="w-16 h-1 bg-sky-500 absolute bottom-0 rounded left-[50%] -translate-x-[50%]"></div>
+          <div className="w-24 h-1 bg-sky-500 absolute bottom-0 rounded left-[50%] -translate-x-[50%]"></div>
         )}
       </div>
     </div>

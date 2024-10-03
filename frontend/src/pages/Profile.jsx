@@ -14,7 +14,9 @@ import PostModal from "../components/PostModal.jsx";
 import CommentModal from "../components/CommentModal.jsx";
 import MobileNavbar from "../components/MobileNavbar.jsx";
 import { PostButton } from "../components/PostButton.jsx";
+import Loader from "../components/Loader.jsx";
 
+const SERVER = import.meta.env.VITE_SERVER_URL;
 export const Profile = () => {
   const { username } = useParams();
   const { user: currentUser } = useAuth();
@@ -103,9 +105,12 @@ export const Profile = () => {
     setIsEditModalOpen(false);
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  if (loading)
+    return (
+      <div className="w-full h-full bg-white dark:bg-black">
+        <Loader />
+      </div>
+    );
 
   if (error) {
     return <div>Error: {error.message}</div>;
@@ -149,7 +154,7 @@ export const Profile = () => {
             <div className="max-w-[600px] h-[200px] bg-slate-300 dark:bg-gray-600">
               {user.bannerImage && (
                 <img
-                  src={`http://localhost:8080/api/user/bannerImage/${user.bannerImage}`}
+                  src={`${SERVER}/api/user/bannerImage/${user.bannerImage}`}
                   alt=""
                   className="w-full h-full object-cover"
                 />
@@ -160,7 +165,7 @@ export const Profile = () => {
                 <div className="w-[134px] h-[134px] rounded-full absolute bg-black opacity-0 hover:opacity-15 cursor-pointer transition-colors duration-300"></div>
                 <Avatar
                   name={user.name}
-                  src={`http://localhost:8080/api/user/profileImage/${user.profileImage}`}
+                  src={`${SERVER}/api/user/profileImage/${user.profileImage}`}
                   size="134"
                   round={true}
                   className="min-w-[40px] object-cover"
@@ -197,7 +202,7 @@ export const Profile = () => {
                 </button>
               )}
             </div>
-            <div className="w-full max-w-[600px] mt-[40px] ml-4">
+            <div className="w-full max-w-[600px] mt-[40px] pl-4">
               <h1 className="font-bold text-2xl dark:text-white">
                 {user.name}
               </h1>

@@ -18,6 +18,7 @@ import { IoClose } from "react-icons/io5";
 import { timeSince } from "../utils/timeSince.js";
 import { ProfileAvatar } from "./ProfileAvatar.jsx";
 
+const SERVER = import.meta.env.VITE_SERVER_URL;
 const Tweet = ({
   tweet,
   onClick,
@@ -119,47 +120,86 @@ const Tweet = ({
 
     fetchTweetData();
     checkFollowingStatus();
-  }, [_id, currentUser._id, user._id, user.username]);
+  }, []);
 
   const handleLike = async (event) => {
     event.preventDefault();
     event.stopPropagation();
+
+    // Usar el valor anterior de isLiked para asegurarse de que se actualice correctamente
+    setIsLiked((prevIsLiked) => {
+      if (!prevIsLiked) {
+        setLikes([...likes, username]); // Agregar like si no está marcado
+      } else {
+        setLikes(likes.filter((user) => user !== username)); // Quitar like si ya está marcado
+      }
+      return !prevIsLiked; // Invertir el estado de like
+    });
+
     try {
       const response = await instance.put(`/api/tweets/${_id}/like`);
       if (response.status === 200) {
-        setIsLiked(!isLiked);
-        setLikes(response.data.tweet.likes);
+        setLikes(response.data.tweet.likes); // Actualizar likes con el valor del servidor
+      } else {
+        setIsLiked((prev) => !prev); // Revertir el cambio si la respuesta no es exitosa
       }
     } catch (error) {
       console.error("Error al dar like al tweet:", error);
+      setIsLiked((prev) => !prev); // Revertir el cambio en caso de error
     }
   };
 
   const handleBookmark = async (event) => {
     event.preventDefault();
     event.stopPropagation();
+
+    // Usar el valor anterior de isBookmarked para asegurarte de que se actualice correctamente
+    setIsBookmarked((prevIsBookmarked) => {
+      if (!prevIsBookmarked) {
+        setBookmarks([...bookmarks, username]); // Agregar bookmark si no está marcado
+      } else {
+        setBookmarks(bookmarks.filter((user) => user !== username)); // Quitar bookmark si ya está marcado
+      }
+      return !prevIsBookmarked; // Invertir el estado de bookmark
+    });
+
     try {
       const response = await instance.put(`/api/tweets/${_id}/bookmark`);
       if (response.status === 200) {
-        setIsBookmarked(!isBookmarked);
-        setBookmarks(response.data.tweet.bookmarks);
+        setBookmarks(response.data.tweet.bookmarks); // Actualizar bookmarks con el valor del servidor
+      } else {
+        setIsBookmarked((prev) => !prev); // Revertir el cambio si la respuesta no es exitosa
       }
     } catch (error) {
       console.error("Error al guardar el tweet:", error);
+      setIsBookmarked((prev) => !prev); // Revertir el cambio en caso de error
     }
   };
 
   const handleRetweet = async (event) => {
     event.preventDefault();
     event.stopPropagation();
+
+    // Usar el valor anterior de isRetweeted para asegurarse de que se actualice correctamente
+    setIsRetweeted((prevIsRetweeted) => {
+      if (!prevIsRetweeted) {
+        setRetweets([...retweets, username]); // Agregar retweet si no está marcado
+      } else {
+        setRetweets(retweets.filter((user) => user !== username)); // Quitar retweet si ya está marcado
+      }
+      return !prevIsRetweeted; // Invertir el estado de retweet
+    });
+
     try {
       const response = await instance.post(`/api/tweets/${_id}/retweet`);
       if (response.status === 200) {
-        setIsRetweeted(!isRetweeted);
-        setRetweets(response.data.tweet.retweets);
+        setRetweets(response.data.tweet.retweets); // Actualizar retweets con el valor del servidor
+      } else {
+        setIsRetweeted((prev) => !prev); // Revertir el cambio si la respuesta no es exitosa
       }
     } catch (error) {
       console.error("Error al retweetear:", error);
+      setIsRetweeted((prev) => !prev); // Revertir el cambio en caso de error
     }
   };
 
@@ -326,16 +366,16 @@ const Tweet = ({
               profileClick={handleProfileClick}
             />
             <div className="ml-2 w-[calc(100%-48px)]">
-              <div className="flex items-center justify-between">
-                <span className="flex">
+              <div className="flex items-center justify-between h-[40px] xxsm">
+                <span className="flex xxsm-n">
                   <h1
-                    className="font-bold hover:underline text-black dark:text-white"
+                    className="font-bold hover:underline text-black dark:text-white xxsm-un"
                     onClick={handleProfileClick}
                   >
                     {user.name}
                   </h1>
                   <p
-                    className="text-gray-500 flex items-center ml-1"
+                    className="text-gray-500 flex items-center ml-1 xxsm-un"
                     onClick={handleProfileClick}
                   >
                     @{user.username} · {formattedDate}
@@ -457,7 +497,7 @@ const Tweet = ({
               {tweetImage && (
                 <div className="relative">
                   <img
-                    src={`http://localhost:8080/api/tweets/image/${tweetImage}`}
+                    src={`${SERVER}/api/tweets/image/${tweetImage}`}
                     alt="tweet"
                     className="mt-2 rounded-lg max-h-[550px]"
                   />

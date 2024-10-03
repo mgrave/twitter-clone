@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import Avatar from "react-avatar";
 
+const SERVER = import.meta.env.VITE_SERVER_URL;
 export const ProfileAvatar = ({
   name,
   profileImage,
@@ -18,7 +19,7 @@ export const ProfileAvatar = ({
         onClick={profileClick}
       ></div>
       <Avatar
-        src={`http://localhost:8080/api/user/profileImage/${profileImage}`}
+        src={`${SERVER}/api/user/profileImage/${profileImage}`}
         name={name}
         size={s ? s : "40"}
         round={true}

@@ -13,29 +13,49 @@ export const Register = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      await instance.post("/api/user/register", {
+      const response = await instance.post("/api/user/register", {
         name,
         username,
         email,
         password,
       });
-      toast.success("Registered successfully! Please login.");
-      navigate("/login");
+
+      if (response.status === 201) {
+        toast.info(
+          "Registered successfully! Your account will expire in 5 minutes."
+        );
+        // Guardar tiempo de expiración en localStorage
+        const expirationTime = Date.now() + 300000; // 5 minutos en milisegundos
+        localStorage.setItem("accountExpiration", expirationTime);
+
+        // Redirigir inmediatamente
+        navigate("/login");
+      }
     } catch (err) {
-      toast.error("Registration failed");
+      // Aquí verificamos el código de estado del error
+      if (err.response && err.response.status === 401) {
+        toast.info("User limit reached. Please try again later.");
+      } else {
+        toast.error("Registration failed");
+      }
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen w-[80%] m-auto">
-      <svg viewBox="0 0 24 24" aria-hidden="true" width="50%">
+    <div className="flex justify-center items-center min-h-screen w-[80%] m-auto sm-r">
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        width="50%"
+        className="sm-t-r"
+      >
         <g>
           <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
         </g>
       </svg>
-      <div className="p-6 w-96">
+      <div className="p-6 w-full max-w-96 flex flex-col items-center justify-center">
         <h1 className="text-2xl font-bold mb-4 text-center">Register</h1>
-        <form onSubmit={handleRegister}>
+        <form onSubmit={handleRegister} className="w-full">
           <div className="mb-4">
             <label className="block text-black font-semibold">Name</label>
             <input

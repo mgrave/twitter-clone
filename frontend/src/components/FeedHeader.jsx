@@ -35,7 +35,6 @@ const FeedHeader = ({ activeTab, setActiveTab }) => {
           setIsHeaderVisible(false);
         }
       } else {
-        // Scrolling up
         if (!isHeaderVisible) {
           setIsHeaderVisible(true);
         }
@@ -57,14 +56,14 @@ const FeedHeader = ({ activeTab, setActiveTab }) => {
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
-    window.scrollTo(0, 0); // Restablecer el scroll a la parte superior
+    window.scrollTo(0, 0);
   };
 
   return (
     <div
       className={`${
         isHeaderVisible ? "xsm-fh-v" : "xsm-t-h"
-      } flex flex-col items-center fixed w-[calc(100%-70px)] max-w-[598px] top-0 h-[57px] z-50 transition-all duration-500 xsm-fh`}
+      } flex flex-col items-center fixed w-[calc(100%-70px)] max-w-[598px] top-0 h-[57px] z-50 transition-all duration-300 xsm-fh`}
     >
       <div
         className={`w-full hidden items-center justify-between h-[57px] px-4 dark:bg-black bg-white z-40 xsm-fh-t`}
@@ -154,7 +153,7 @@ const FeedHeader = ({ activeTab, setActiveTab }) => {
           }`}
           onClick={() => handleTabClick("ForYou")}
         >
-          For you
+          Para ti
           {activeTab === "ForYou" && (
             <div className="w-16 h-1 bg-sky-500 absolute bottom-0 rounded"></div>
           )}
@@ -167,7 +166,7 @@ const FeedHeader = ({ activeTab, setActiveTab }) => {
           }`}
           onClick={() => handleTabClick("Following")}
         >
-          Following
+          Siguiendo
           {activeTab === "Following" && (
             <div className="w-16 h-1 bg-sky-500 absolute bottom-0 rounded"></div>
           )}

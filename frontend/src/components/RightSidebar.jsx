@@ -9,7 +9,7 @@ export const RightSidebar = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await instance.get("http://localhost:8080/api/user/");
+        const response = await instance.get("/api/user/");
         setUsers(response.data.users);
       } catch (err) {
         console.error("Error fetching users:", err);
@@ -28,12 +28,12 @@ export const RightSidebar = () => {
         <input
           type="text"
           className="w-full bg-transparent outline-none pl-4 text-black dark:text-white"
-          placeholder="Search"
+          placeholder="Buscar"
         />
       </div>
       <div className="border border-gray-200 dark:border-gray-600 rounded-2xl mt-4 overflow-hidden min-h-[336px]">
         <h1 className="font-bold text-xl ml-4 my-3 text-black dark:text-white">
-          Who to follow
+          A quién seguir
         </h1>
         {users.map((user) => (
           <User key={user._id} user={user} />
